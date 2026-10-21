@@ -66,7 +66,7 @@ class AboutPage(Page):
             info,
             Adw.ActionRow(
                 title="Cấu hình",
-                subtitle="Cùng addon ngosen, nên cài đặt cũ vẫn dùng được",
+                subtitle="Giữ nguyên cấu hình, từ điển và gõ tắt bạn đã dùng",
             ),
             "cau hinh addon ngosen",
         )

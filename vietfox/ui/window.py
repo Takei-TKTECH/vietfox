@@ -538,7 +538,7 @@ class VietfoxWindow(Adw.ApplicationWindow):
             if not isinstance(data, dict) or not any(
                 key in data for key in ("settings", "config", "macros", "rules", "dictionary")
             ):
-                self.show_error("Tệp không phải bản sao lưu của Vietfox hoặc Ngó Sen.")
+                self.show_error("Tệp không phải bản sao lưu của Vietfox.")
                 return
 
             def confirmed() -> None:

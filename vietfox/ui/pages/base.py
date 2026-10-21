@@ -14,7 +14,7 @@ from ...core.store import BOOL, HOTKEY, INT, TEXT
 from ..helpers import pretty_hotkey
 
 MODE_OPTIONS = [
-    ("Sen", "Gõ Sen"),
+    ("Sen", "Mặc định"),
     ("Preedit", "Gạch chân"),
     ("Emoji Picker", "Chọn emoji"),
     ("OFF", "Tắt"),

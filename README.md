@@ -64,7 +64,7 @@ hoặc `python3 -m vietfox`.
 ./install.sh --with-engine
 ```
 
-Lệnh này cài **giao diện + engine Ngó Sen đi kèm** vào máy, thêm “Ngó Sen” vào
+Lệnh này cài **giao diện + engine Ngó Sen đi kèm** vào máy, thêm “Vietfox” vào
 nhóm gõ của fcitx5 rồi khởi động lại fcitx5. Sau đó **không cần** cài gói
 `fcitx5-ngosen` nữa.
 
@@ -89,7 +89,7 @@ curl -fsSL https://raw.githubusercontent.com/ngosen/ngosen/main/install.sh | bas
 ```
 
 Cài xong chạy `vietfox` hoặc mở **Vietfox** trong menu ứng dụng, chọn chế độ
-**Gõ Sen**, kiểu **Telex**, rồi dùng Ctrl+Space để bật bộ gõ.
+**Mặc định**, kiểu **Telex**, rồi dùng Ctrl+Space để bật bộ gõ.
 
 ## Gỡ
 

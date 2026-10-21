@@ -94,6 +94,6 @@ def pretty_hotkey(value: str) -> str:
 
 
 def mode_label(mode: str) -> str:
-    return {"2": "Gõ Sen", "5": "Gạch chân", "6": "Chọn emoji", "0": "Tắt"}.get(
-        str(mode), "Gõ Sen"
+    return {"2": "Mặc định", "5": "Gạch chân", "6": "Chọn emoji", "0": "Tắt"}.get(
+        str(mode), "Mặc định"
     )

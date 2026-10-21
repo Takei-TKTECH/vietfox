@@ -17,7 +17,7 @@ from ...core.store import BOOL, TEXT
 from .base import Page
 
 MODES = [
-    ("Sen", "Gõ Sen", "1"),
+    ("Sen", "Mặc định", "1"),
     ("Preedit", "Gạch chân", "q"),
     ("Emoji", "Chọn emoji", "w"),
     ("Off", "Tắt", "e"),

@@ -57,14 +57,14 @@ class TypingPage(Page):
     def build(self) -> None:
         modes = self.group(
             "Chế độ gõ",
-            "Gõ Sen đưa chữ thẳng vào ứng dụng và là chế độ nên dùng. Gạch chân hiện chữ đang gõ dưới con trỏ.",
+            "Mặc định đưa chữ thẳng vào ứng dụng và là chế độ nên dùng. Gạch chân hiện chữ đang gõ dưới con trỏ.",
         )
         self.add(
             modes,
             self.combo(
                 "Mode",
                 "Chế độ gõ",
-                [("Sen", "Gõ Sen"), ("Preedit", "Gạch chân"), ("Emoji Picker", "Chọn emoji"), ("OFF", "Tắt")],
+                [("Sen", "Mặc định"), ("Preedit", "Gạch chân"), ("Emoji Picker", "Chọn emoji"), ("OFF", "Tắt")],
                 default="Sen",
                 keywords="mode sen preedit gach chan emoji tat kieu go",
             ),
@@ -230,7 +230,7 @@ class TypingPage(Page):
             self.switch(
                 "WaitSurroundingEvent",
                 "Chờ sự kiện surrounding text",
-                "Thử nghiệm, dùng cho chế độ Gõ Sen.",
+                "Thử nghiệm, dùng cho chế độ Mặc định.",
                 True,
                 keywords="cho su kien surrounding",
             ),

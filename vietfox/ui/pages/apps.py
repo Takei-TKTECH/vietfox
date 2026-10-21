@@ -13,7 +13,7 @@ from ...core.backend import BackendError
 from ..dialogs import FormDialog
 from .base import Page
 
-RULE_MODES = [("2", "Gõ Sen"), ("5", "Gạch chân"), ("6", "Chọn emoji"), ("0", "Tắt")]
+RULE_MODES = [("2", "Mặc định"), ("5", "Gạch chân"), ("6", "Chọn emoji"), ("0", "Tắt")]
 
 
 class AppsPage(Page):

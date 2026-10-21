@@ -166,14 +166,14 @@ if [[ $WITH_ENGINE -eq 1 ]]; then
     fi
 elif ! dpkg -s fcitx5-ngosen >/dev/null 2>&1 && ! [[ -f "/usr/lib/$(uname -m)-linux-gnu/fcitx5/libngosen.so" ]]; then
     echo
-    echo "Lưu ý: chưa có engine Ngó Sen. Muốn cài kèm, chạy lại với --with-engine."
+    echo "Lưu ý: chưa có engine Vietfox. Muốn cài kèm, chạy lại với --with-engine."
 fi
 
 # ------------------------------------------------- thêm vào nhóm gõ fcitx5
 enable_input_method() {
     local profile="$HOME/.config/fcitx5/profile"
     if [[ ! -f "$profile" ]]; then
-        echo "Chưa có $profile — mở fcitx5 một lần rồi thêm “Ngó Sen” trong Cấu hình bàn phím."
+        echo "Chưa có $profile — mở fcitx5 một lần rồi thêm “Vietfox” trong Cấu hình bàn phím."
         return 0
     fi
     python3 - "$profile" <<'PY'
@@ -183,13 +183,13 @@ import sys
 path = sys.argv[1]
 text = open(path, encoding="utf-8").read()
 if re.search(r"^Name=ngosen$", text, re.M):
-    print("Ngó Sen đã có trong nhóm gõ của fcitx5.")
+    print("Vietfox đã có trong nhóm gõ của fcitx5.")
     raise SystemExit(0)
 
 lines = text.splitlines()
 start = next((i for i, line in enumerate(lines) if line.strip() == "[Groups/0]"), None)
 if start is None:
-    print("Không thấy nhóm [Groups/0]; hãy thêm Ngó Sen bằng fcitx5-configtool.", file=sys.stderr)
+    print("Không thấy nhóm [Groups/0]; hãy thêm Vietfox bằng fcitx5-configtool.", file=sys.stderr)
     raise SystemExit(1)
 
 end = next((i for i in range(start + 1, len(lines)) if lines[i].startswith("[")), len(lines))
@@ -207,7 +207,7 @@ if not has_default:
 
 lines[end:end] = [f"[Groups/0/Items/{new_index}]", "Name=ngosen", "Layout="]
 open(path, "w", encoding="utf-8").write("\n".join(lines) + "\n")
-print("Đã thêm Ngó Sen vào nhóm gõ của fcitx5.")
+print("Đã thêm Vietfox vào nhóm gõ của fcitx5.")
 PY
 }
 
