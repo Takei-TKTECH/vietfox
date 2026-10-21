@@ -22,7 +22,7 @@ from gi.repository import Gio, GLib
 FCITX_NAME = "org.fcitx.Fcitx5"
 FCITX_PATH = "/controller"
 FCITX_IFACE = "org.fcitx.Fcitx.Controller1"
-ADDON_NAMES = ("ngosen", "vietfox")
+ADDON_NAMES = ("vietfox", "ngosen")
 
 
 class BackendError(Exception):

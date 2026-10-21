@@ -1,0 +1,6 @@
+[InputMethod]
+Name=Vietfox
+Icon=io.github.vietfox.Vietfox
+LangCode=vi
+Addon=vietfox
+Configurable=False

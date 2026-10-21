@@ -1,0 +1,11 @@
+# CMake build files
+CMakeFiles/
+Makefile
+cmake_install.cmake
+# Compiled library
+*.so
+# Generated config files
+vietfox-addon.conf
+vietfox-addon.conf.in
+vietfox.conf
+vietfoxmigrate.conf

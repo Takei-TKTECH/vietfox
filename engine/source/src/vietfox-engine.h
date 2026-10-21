@@ -1,0 +1,431 @@
+/*
+ * SPDX-FileCopyrightText: 2022-2022 CSSlayer <wengxt@gmail.com>
+ * SPDX-FileCopyrightText: 2025 Võ Ngô Hoàng Thành <thanhpy2009@gmail.com>
+ * SPDX-FileCopyrightText: 2026 Nguyễn Hoàng Kỳ  <nhktmdzhg@gmail.com>
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
+ */
+
+/**
+ * @file vietfox-engine.h
+ * @brief Main engine implementation for the Ngó Sen Vietnamese input method.
+ */
+
+#ifndef _FCITX5_NGOSEN_ENGINE_H_
+#define _FCITX5_NGOSEN_ENGINE_H_
+
+#include "vietfox-config.h"
+#include "vietfox-engine-resources.h"
+#include "emoji.h"
+#include "vietfox-options.h"
+#include "vietfox-go-object.h"
+#include <mutex>
+#include <memory>
+#include <fcitx-config/iniparser.h>
+#include <fcitx/action.h>
+#include <fcitx/addonfactory.h>
+#include <fcitx/addonmanager.h>
+#include <fcitx/candidatelist.h>
+#include <fcitx/inputmethodengine.h>
+#include <fcitx/instance.h>
+#include <fcitx-utils/event.h>
+
+namespace ngosen {
+    class TypingState;
+}
+
+namespace fcitx {
+
+    // Hangs one typing state on each fcitx5 input context; the state itself does not depend on fcitx5.
+    class TypingStateProperty final : public InputContextProperty {
+      public:
+        explicit TypingStateProperty(std::unique_ptr<ngosen::TypingState> state);
+        ~TypingStateProperty() override;
+
+        ngosen::TypingState& state() {
+            return *state_;
+        }
+
+      private:
+        std::unique_ptr<ngosen::TypingState> state_;
+    };
+
+    /**
+     * @brief Main engine class for the Ngó Sen input method.
+     *
+     * Handles input processing, configuration management, and UI actions.
+     * Implements fcitx InputMethodEngine interface.
+     */
+    class NgoSenEngine final : public InputMethodEngineV2, public ngosen::EngineResources {
+      public:
+        /**
+         * @brief Constructs the engine.
+         * @param instance Pointer to fcitx instance.
+         */
+        NgoSenEngine(Instance* instance);
+
+        /**
+         * @brief Destroys the engine and releases resources.
+         */
+        ~NgoSenEngine();
+
+        // Rule of five
+        NgoSenEngine(const NgoSenEngine&)            = delete;
+        NgoSenEngine& operator=(const NgoSenEngine&) = delete;
+        NgoSenEngine(NgoSenEngine&&)                 = delete;
+        NgoSenEngine& operator=(NgoSenEngine&&)      = delete;
+
+        /**
+         * @brief Activates the input method for an input context.
+         * @param entry Input method entry.
+         * @param event Activation event.
+         */
+        void activate(const InputMethodEntry& entry, InputContextEvent& event) override;
+
+        /**
+         * @brief Deactivates the input method.
+         * @param entry Input method entry.
+         * @param event Deactivation event.
+         */
+        void deactivate(const InputMethodEntry& entry, InputContextEvent& event) override;
+
+        /**
+         * @brief Processes key events.
+         * @param entry Input method entry.
+         * @param keyEvent The key event to process.
+         */
+        void keyEvent(const InputMethodEntry& entry, KeyEvent& keyEvent) override;
+
+        /**
+         * @brief Resets the input method state.
+         * @param entry Input method entry.
+         * @param event Reset event.
+         */
+        void reset(const InputMethodEntry& entry, InputContextEvent& event) override;
+
+        /**
+         * @brief Reloads configuration from disk.
+         */
+        void reloadConfig() override;
+
+        /**
+         * @brief Gets the current configuration.
+         * @return Pointer to configuration object.
+         */
+        const Configuration* getConfig() const override {
+            return &config_;
+        }
+
+        /**
+         * @brief Gets a sub-configuration by path.
+         * @param path Sub-config path.
+         * @return Pointer to sub-configuration.
+         */
+        const Configuration* getSubConfig(const std::string& path) const override;
+
+        /**
+         * @brief Applies configuration changes.
+         * @param config New configuration.
+         */
+        void setConfig(const RawConfig& config) override;
+
+        /**
+         * @brief Applies sub-configuration changes.
+         * @param path Sub-config path.
+         * @param config New sub-configuration.
+         */
+        void setSubConfig(const std::string& path, const RawConfig& config) override;
+
+        /**
+         * @brief Gets the current sub-mode label.
+         * @param entry Input method entry.
+         * @param inputContext Current input context.
+         * @return Mode label string.
+         */
+        std::string subMode(const InputMethodEntry& entry, InputContext& inputContext) override;
+
+        /**
+         * @brief Sets the current sub-mode icon.
+         * @param entry Input method entry.
+         * @param inputContext Current input context.
+         * @return Icon name string.
+         */
+        std::string subModeIconImpl(const InputMethodEntry& entry, InputContext& inputContext) override;
+
+        /**
+         * @brief Sets the current sub-mode label.
+         * @param entry Input method entry.
+         * @param inputContext Current input context.
+         * @return Label string.
+         */
+        std::string subModeLabelImpl(const InputMethodEntry& entry, InputContext& inputContext) override;
+
+        /**
+         * @brief Gets the current configuration.
+         * @return Reference to the configuration.
+         */
+        const auto& config() const {
+            return config_;
+        }
+
+        // The settings the typing logic reads, kept in step with config().
+        const ngosen::Options& options() const override {
+            return options_;
+        }
+
+        std::vector<ngosen::KeymapEntry> customKeymap() const override;
+
+        /**
+         * @brief Gets the dictionary handle.
+         * @return CGo handle for the dictionary.
+         */
+        uintptr_t dictionary() const override {
+            return dictionary_.handle();
+        }
+
+        /**
+         * @brief Gets the macro table handle.
+         * @return CGo handle for the macro table.
+         */
+        uintptr_t macroTable() const override;
+
+        /**
+         * @brief Gets the emoji loader.
+         * @return Reference to emoji loader instance.
+         */
+        EmojiLoader& emojiLoader() {
+            if (!emojiLoader_) {
+                emojiLoader_ = std::make_unique<EmojiLoader>(&instance_->addonManager());
+            }
+            return *emojiLoader_;
+        }
+
+        std::vector<EmojiEntry> emojiHistory() override {
+            return emojiLoader().history();
+        }
+        std::vector<EmojiEntry> searchEmoji(const std::string& prefix) override {
+            return emojiLoader().search(prefix);
+        }
+        void recordEmoji(const EmojiEntry& entry) override {
+            emojiLoader().recordHistory(entry);
+        }
+        ngosen::Recorder& recorder() override {
+            return recorder_;
+        }
+
+      private:
+        ngosen::TypingState*                        stateFor(InputContext* ic);
+
+        Instance*                                   instance_;
+        ngosenConfig                                config_;
+        ngosen::Options                             options_;
+        ngosenCustomKeymap                          customKeymap_;
+
+        ngosenMacroTable                            macroTables_;
+        ngosen::CGoObject                           macroTableObject_;
+        ngosenAppRules                              appRulesTables_;
+
+        FactoryFor<TypingStateProperty>             factory_;
+        std::vector<std::string>                    imNames_;
+
+        std::unique_ptr<SimpleAction>               charsetAction_;
+        std::vector<std::unique_ptr<SimpleAction>>  charsetSubAction_;
+        std::unique_ptr<Menu>                       charsetMenu_;
+
+        std::unique_ptr<SimpleAction>               spellCheckAction_;
+        std::unique_ptr<SimpleAction>               macroAction_;
+        std::unique_ptr<SimpleAction>               capitalizeMacroAction_;
+        std::unique_ptr<SimpleAction>               autoNonVnRestoreAction_;
+        std::unique_ptr<SimpleAction>               enableDictionaryAction_;
+        std::unique_ptr<SimpleAction>               settingsAction_;
+        std::unique_ptr<SimpleAction>               saveLogAction_;
+        ngosen::Recorder                            recorder_;
+        std::vector<SimpleAction*>                  toggleActions_;
+        std::vector<ScopedConnection>               connections_;
+        ngosen::CGoObject                           dictionary_;
+        std::unordered_map<std::string, NgoSenMode> appRules_;
+        std::string                                 appRulesPath_;
+        bool                                        isSelectingAppMode_ = false;
+        std::string                                 currentConfigureApp_;
+        std::unique_ptr<EventSourceTime>            cycleModeNotificationTimer_;
+        std::string                                 iconCacheName_;
+        std::string                                 iconCachePath_;
+        static constexpr uint64_t                   CYCLE_MODE_NOTIFICATION_TIMEOUT_USEC = 800000; // 800ms in microseconds
+        FCITX_ADDON_DEPENDENCY_LOADER(emoji, instance_->addonManager());
+        std::unique_ptr<EmojiLoader>           emojiLoader_;
+        mutable std::mutex                     appRulesMutex_;
+        std::unordered_map<KeySym, NgoSenMode> modeMenuMapping_;
+        // A Wayland click reaches the IM only as a surrounding text update.
+        std::unique_ptr<HandlerTableEntry<EventHandler>> cursorJumpWatcher_;
+        std::unique_ptr<HandlerTableEntry<EventHandler>> commitWatcher_;
+        std::unique_ptr<HandlerTableEntry<EventHandler>> contextDestroyedWatcher_;
+
+        // Text typed while another input method is on, for TypingState::offerRetype.
+        std::unique_ptr<HandlerTableEntry<EventHandler>>              keyWhileOffWatcher_;
+        std::vector<std::unique_ptr<HandlerTableEntry<EventHandler>>> leaveTextWatchers_;
+
+        /**
+         * @brief Refreshes the bamboo engine with current settings.
+         */
+        void refreshEngine();
+
+        /**
+         * @brief Refreshes engine options from configuration.
+         */
+        void refreshOption();
+
+        /**
+         * @brief Saves current configuration to disk.
+         */
+        void saveConfig() {
+            safeSaveAsIni(config_, "conf/ngosen.conf");
+        }
+
+        /**
+         * @brief Initialize toggle action
+         * @param action The action to initialize
+         * @param option The option to toggle
+         * @param actionId The action ID
+         * @param iconName The icon name
+         * @param textLong The long text
+         * @param textOnOff The text to display when on/off
+         * @param uiManager The UI manager
+         *
+        */
+        void initToggleAction(std::unique_ptr<SimpleAction>& action, Option<bool>& option, const std::string& actionId, const std::string& iconName, const std::string& textLong,
+                              const std::string& textOnOff, UserInterfaceManager& uiManager);
+
+        /**
+         * @brief Update toggle action
+         * @param ic The input context
+         * @param action The action to update
+         * @param option The option to toggle
+         * @param textOnOff The text to display when on/off
+         */
+        static void updateAction(InputContext* ic, std::unique_ptr<SimpleAction>& action, Option<bool>& option, const std::string& textOnOff);
+
+        /**
+         * @brief Updates the charset action UI.
+         * @param ic Current input context.
+         */
+        void updateCharsetAction(InputContext* ic);
+
+        /**
+         * @brief Populates input method names from bamboo core.
+         */
+        void populateConfig();
+
+        // Copies config_ into options_; call after every change to config_.
+        void syncOptions();
+
+        /**
+         * @brief Loads application-specific mode rules.
+         */
+        void loadAppRules();
+
+        /**
+         * @brief Saves application-specific mode rules.
+         */
+        void saveAppRules() const;
+
+        /**
+         * @brief Get application-specific mode rules
+         * @return Current application-specific mode rules
+        */
+
+        NgoSenMode getAppRule(const std::string& appName) const;
+
+        /**
+         * @brief Set application-specific mode rules
+         * @param appName The application name
+         * @param mode The mode to set
+         */
+        void setAppRule(const std::string& appName, NgoSenMode mode);
+
+        /**
+         * @brief Shows the application mode selection menu.
+         * @param ic Current input context.
+         */
+        void showAppModeMenu(InputContext* ic);
+
+        // One line of the mode menu, before the menu drops hidden modes.
+        struct ModeMenuItem {
+            NgoSenMode  mode;
+            std::string label;
+            KeySym      key;
+            bool        visible;
+        };
+        // Every mode in the configured order, then the ones the order leaves out.
+        std::vector<ModeMenuItem> modeMenuItems();
+        // Adds the item that types the menu hotkey's own character, when it is a plain key.
+        void appendTypeHotkeyItem(CommonCandidateList& candidateList);
+
+        // Writes the recorder to a new file under the user's state directory and shows its path.
+        void saveTypingLog(InputContext* ic);
+        void clearPanelLater(InputContext* ic, uint64_t delayUs);
+
+        void handleModeMenuKey(KeyEvent& keyEvent);
+        void moveModeMenuCursor(InputContext* ic, CommonCandidateList* menuList, int delta);
+        // Hides the menu; resetState also commits and clears what the field was typing.
+        void closeModeMenuPanel(InputContext* ic, bool resetState);
+        // Applies a mode picked from the menu and remembers it for the app, unless it is the emoji picker.
+        void pickMenuMode(InputContext* ic, NgoSenMode mode, bool isDefault);
+        void openModeMenu(InputContext* ic);
+        // The modes the cycle key steps through, in the configured order.
+        std::vector<NgoSenMode> cycleModes();
+        void                    cycleMode(InputContext* ic);
+
+        /**
+         * @brief Shows a brief notification of the cycled mode.
+         * @param mode The mode that was cycled to.
+         * @param ic Current input context.
+         */
+        void showCycleModeNotification(NgoSenMode mode, InputContext* ic);
+
+        /**
+         * @brief Closes the application mode selection menu.
+         */
+        void closeAppModeMenu();
+
+        /**
+         * @brief Sets the current input mode.
+         * @param mode The mode to set.
+         * @param ic Current input context.
+         */
+        void setMode(NgoSenMode mode, InputContext* ic);
+
+        /**
+         * @brief Get name of current program
+         * @param ic Current input context.
+         * @return Name of current program
+         */
+        static std::string getProgramName(InputContext* ic);
+
+        /**
+         * @brief Removes any per-app rule for appName so the app follows the
+         *        global Mode again.
+         * @param appName Name of application.
+         */
+        void clearAppRule(const std::string& appName);
+    };
+
+    /**
+     * @brief Factory class for creating NgoSenEngine instances.
+     */
+    class NgoSenFactory : public AddonFactory {
+      public:
+        /**
+         * @brief Creates a new NgoSenEngine instance.
+         * @param manager Pointer to addon manager.
+         * @return New engine instance.
+         */
+        AddonInstance* create(AddonManager* manager) override {
+            registerDomain("fcitx5-vietfox", FCITX_INSTALL_LOCALEDIR);
+            return new NgoSenEngine(manager->instance()); // NOLINT
+        }
+    };
+
+} // namespace fcitx
+
+#endif // _FCITX5_NGOSEN_ENGINE_H_

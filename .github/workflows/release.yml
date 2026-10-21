@@ -1,0 +1,33 @@
+name: Publish source bundle
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check installer and bundle the source
+        run: |
+          bash -n install.sh engine/build-ubuntu.sh
+          python3 -m compileall -q vietfox
+          (cd engine/variants && sha256sum --check SHA256SUMS)
+          mkdir -p dist
+          git archive --format=tar.gz --prefix="vietfox-${GITHUB_REF_NAME}/" "${GITHUB_REF_NAME}" \
+            > "dist/vietfox-${GITHUB_REF_NAME}-source.tar.gz"
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" dist/*.tar.gz \
+            --repo "${GITHUB_REPOSITORY}" \
+            --title "Vietfox ${GITHUB_REF_NAME}" \
+            --generate-notes

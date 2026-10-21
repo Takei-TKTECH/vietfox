@@ -1,21 +1,12 @@
-# Ubuntu engine variants
+# Engine theo Ubuntu và kiến trúc
 
-These ABI-specific engine binaries come from Ngó Sen 1.5.2-1 Ubuntu packages.
-The Ubuntu 26.04 amd64 variant is rebuilt from tag `ngosen-1.5.2-1` with
-`../patches/vietfox-status-menu.patch`; all variants are selected by Ubuntu
-codename and Debian architecture in `install.sh`. This patch restores the quick
-feature actions and hardcodes their labels in Vietnamese.
+Installer chỉ cài engine khi có đủ thư viện Vietfox đã build cho đúng codename Ubuntu và kiến trúc.
+Binary Ngó Sen cũ không được dùng làm phương án dự phòng vì chúng đăng ký addon khác.
 
-| Ubuntu | amd64 | arm64 | Origin |
-| --- | --- | --- | --- |
-| 22.04 (jammy) | included | included | official Ngó Sen package |
-| 24.04 (noble) | included | included | official Ngó Sen package |
-| 26.04 (resolute) | Vietfox-patched build | included | official Ngó Sen package for arm64 |
+| Ubuntu | Kiến trúc | Trạng thái |
+| --- | --- | --- |
+| 26.04 (resolute) | amd64 | Vietfox engine, build từ `source/` trên Ubuntu 26.04 |
+| Ubuntu khác / arm64 | — | Chưa có bản build được xác nhận; installer dừng thay vì cài binary Ngó Sen |
 
-Only the Ubuntu 26.04 amd64 binary currently includes the patched quick menu. The
-other five binaries still use the upstream menu until they are rebuilt against
-their matching Ubuntu/Fcitx ABI.
-
-The official `.deb` assets were checked against their SHA-256 digests from the
-Ngó Sen 1.5.2-1 release before extracting the two engine libraries. The shared
-configuration and Vietnamese translation catalog are stored under `engine/share`.
+Mỗi biến thể cần cả `libvietfox.so` và `libvietfoxmigrate.so`. Chỉ thêm biến thể sau khi build
+trên Ubuntu tương ứng, kiểm tra phụ thuộc động và thử nâng cấp cấu hình Fcitx5 cũ.

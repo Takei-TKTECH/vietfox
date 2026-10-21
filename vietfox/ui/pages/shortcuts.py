@@ -61,28 +61,6 @@ class ShortcutsPage(Page):
         for ident, label, shortcut in MODES:
             menu.add(self._mode_row(ident, label, shortcut))
 
-        icons = self.group("Biểu tượng")
-        self.add(
-            icons,
-            self.combo(
-                "IconTheme",
-                "Màu biểu tượng",
-                [("Auto", "Tự động"), ("Light", "Sáng"), ("Dark", "Tối")],
-                default="Auto",
-                keywords="mau bieu tuong icon theme",
-            ),
-        )
-        self.add(
-            icons,
-            self.switch(
-                "UseLotusIcons",
-                "Dùng biểu tượng trạng thái Vietfox",
-                "Hiện trạng thái gõ trên khay hệ thống.",
-                True,
-                keywords="bieu tuong trang thai khay he thong",
-            ),
-        )
-
         advanced = self.group(
             "Nâng cao",
             "Chỉ cần đổi khi bạn muốn tuỳ biến sâu.",

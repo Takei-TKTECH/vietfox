@@ -1,10 +1,41 @@
 #!/usr/bin/env bash
-# Cài Vietfox (giao diện + tuỳ chọn engine Ngó Sen đi kèm).
+# When downloaded with `curl .../install.sh | bash`, fetch the complete source
+# bundle and continue from a real directory so relative assets are available.
+INPUT_SCRIPT="${BASH_SOURCE[0]:-/dev/stdin}"
+INPUT_DIR="$(cd "$(dirname "$INPUT_SCRIPT")" 2>/dev/null && pwd || true)"
+if [[ ! -f "$INPUT_DIR/vietfox/__init__.py" ]]; then
+    for tool in curl tar; do
+        if ! command -v "$tool" >/dev/null 2>&1; then
+            echo "Thiếu lệnh $tool. Hãy cài $tool rồi chạy lại." >&2
+            exit 1
+        fi
+    done
+    TEMP_SOURCE="$(mktemp -d)"
+    ARCHIVE="$TEMP_SOURCE/vietfox-source.tar.gz"
+    echo "Đang tải mã nguồn Vietfox từ GitHub…"
+    if ! curl -fL --retry 3 \
+        "https://github.com/adfoxtheme/vietfox/archive/refs/heads/main.tar.gz" \
+        -o "$ARCHIVE"; then
+        rm -rf "$TEMP_SOURCE"
+        exit 1
+    fi
+    if ! tar -xzf "$ARCHIVE" --strip-components=1 -C "$TEMP_SOURCE"; then
+        rm -rf "$TEMP_SOURCE"
+        exit 1
+    fi
+    rm -f "$ARCHIVE"
+    bash "$TEMP_SOURCE/install.sh" --with-engine "$@"
+    STATUS=$?
+    rm -rf "$TEMP_SOURCE"
+    exit "$STATUS"
+fi
+
+# Cài Vietfox (ứng dụng Vietfox + engine Vietfox dựa trên lõi Ngó Sen).
 #
 #   ./install.sh                     chỉ cài giao diện vào ~/.local
-#   ./install.sh --with-engine       cài thêm engine vào /usr (cần sudo)
+#   ./install.sh --with-engine       cài thêm engine Vietfox vào /usr (cần sudo)
 #   ./install.sh --with-engine --force-engine
-#                                    ghi đè engine kể cả khi đã có gói fcitx5-ngosen
+#                                    bí danh tương thích cũ của --with-engine
 #   sudo ./install.sh --system       cài giao diện vào /usr/local
 #   ./install.sh --uninstall         gỡ giao diện (thêm --with-engine để gỡ engine)
 set -euo pipefail
@@ -12,11 +43,17 @@ set -euo pipefail
 SRC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PREFIX="${PREFIX:-$HOME/.local}"
 WITH_ENGINE=0
-FORCE_ENGINE=0
 UNINSTALL=0
 
 usage() {
-    sed -n '2,9p' "$0" | sed 's/^# \{0,1\}//'
+    cat <<'EOF'
+Cài Vietfox (ứng dụng Vietfox + engine Vietfox dựa trên lõi Ngó Sen).
+
+  ./install.sh                     chỉ cài giao diện vào ~/.local
+  ./install.sh --with-engine       cài giao diện và engine vào máy (cần sudo)
+  ./install.sh --system            cài giao diện vào /usr/local
+  ./install.sh --uninstall         gỡ giao diện (thêm --with-engine để gỡ engine)
+EOF
 }
 
 while [[ $# -gt 0 ]]; do
@@ -29,7 +66,6 @@ while [[ $# -gt 0 ]]; do
             ;;
         --force-engine)
             WITH_ENGINE=1
-            FORCE_ENGINE=1
             ;;
         --uninstall)
             UNINSTALL=1
@@ -66,13 +102,65 @@ USER_HOME="$HOME"
 if [[ -n "${SUDO_USER:-}" ]]; then
     USER_HOME="$(getent passwd "$SUDO_USER" | cut -d: -f6)"
 fi
-FORWARD_KEYS_UUID="forward-keys@ngosen.github.io"
+
+# The one-command Ubuntu installer fills in the app and engine runtime packages.
+if [[ -r /etc/os-release ]]; then
+    . /etc/os-release
+fi
+if [[ $WITH_ENGINE -eq 1 && $UNINSTALL -eq 0 ]]; then
+    if [[ "${ID:-}" != "ubuntu" || "${VERSION_CODENAME:-}" != "resolute" ]] ||
+       ! command -v dpkg >/dev/null 2>&1 || [[ "$(dpkg --print-architecture)" != "amd64" ]]; then
+        echo "Engine Vietfox hiện chỉ có cho Ubuntu 26.04 amd64; chưa cài đặt gì." >&2
+        exit 1
+    fi
+    if [[ ! -f "$SRC_DIR/engine/variants/ubuntu/resolute/amd64/libvietfox.so" ||
+          ! -f "$SRC_DIR/engine/variants/ubuntu/resolute/amd64/libvietfoxmigrate.so" ]]; then
+        echo "Bản tải xuống thiếu engine Vietfox hoàn chỉnh; chưa cài đặt gì." >&2
+        exit 1
+    fi
+    for legacy_file in \
+        /usr/lib/x86_64-linux-gnu/fcitx5/libngosen.so \
+        /usr/lib/x86_64-linux-gnu/fcitx5/libngosenmigrate.so \
+        /usr/share/fcitx5/addon/ngosen.conf \
+        /usr/share/fcitx5/addon/ngosenmigrate.conf \
+        /usr/share/fcitx5/inputmethod/ngosen.conf; do
+        if [[ -e "$legacy_file" ]] && dpkg-query -S "$legacy_file" >/dev/null 2>&1; then
+            echo "$legacy_file thuộc gói Ubuntu. Hãy gỡ gói Ngó Sen bằng apt trước khi cài Vietfox:" >&2
+            echo "  sudo apt remove fcitx5-ngosen" >&2
+            exit 1
+        fi
+    done
+fi
+if [[ $UNINSTALL -eq 0 && "${ID:-}" == "ubuntu" ]] && command -v apt-get >/dev/null 2>&1; then
+    APT_PACKAGES=(python3-gi gir1.2-gtk-4.0 gir1.2-adw-1)
+    if [[ $WITH_ENGINE -eq 1 ]]; then
+        APT_PACKAGES+=(fcitx5 im-config)
+    fi
+    MISSING_PACKAGES=()
+    for package in "${APT_PACKAGES[@]}"; do
+        if ! dpkg-query -W -f='${db:Status-Status}' "$package" 2>/dev/null | grep -qx installed; then
+            MISSING_PACKAGES+=("$package")
+        fi
+    done
+    if [[ ${#MISSING_PACKAGES[@]} -gt 0 ]]; then
+        echo "Đang cài các gói Ubuntu cần thiết: ${MISSING_PACKAGES[*]}"
+        $SUDO apt-get update
+        $SUDO env DEBIAN_FRONTEND=noninteractive apt-get install -y "${MISSING_PACKAGES[@]}"
+    fi
+fi
+FORWARD_KEYS_UUID="forward-keys@adfoxtheme.github.io"
 FORWARD_KEYS_DIR="$USER_HOME/.local/share/gnome-shell/extensions/$FORWARD_KEYS_UUID"
+LEGACY_FORWARD_KEYS_UUID="forward-keys@ngosen.github.io"
+LEGACY_FORWARD_KEYS_DIR="$USER_HOME/.local/share/gnome-shell/extensions/$LEGACY_FORWARD_KEYS_UUID"
 
 if [[ $UNINSTALL -eq 1 ]]; then
     if [[ -f "$FORWARD_KEYS_DIR/.vietfox-managed" ]]; then
         gnome-extensions disable "$FORWARD_KEYS_UUID" >/dev/null 2>&1 || true
         rm -rf "$FORWARD_KEYS_DIR"
+    fi
+    if [[ -f "$LEGACY_FORWARD_KEYS_DIR/.vietfox-managed" ]]; then
+        gnome-extensions disable "$LEGACY_FORWARD_KEYS_UUID" >/dev/null 2>&1 || true
+        rm -rf "$LEGACY_FORWARD_KEYS_DIR"
     fi
     SETTINGS_LAUNCHER="/usr/bin/fcitx5-ngosen-settings"
     $SUDO rm -f /usr/share/icons/hicolor/scalable/apps/io.github.vietfox.Settings.svg
@@ -83,29 +171,32 @@ if [[ $UNINSTALL -eq 1 ]]; then
         $SUDO rm -f "$SETTINGS_LAUNCHER"
         echo "Đã gỡ launcher Settings của Vietfox."
     fi
+    if [[ $WITH_ENGINE -eq 1 ]]; then
+        if [[ -f /usr/bin/vietfox ]] && grep -q '^# Managed by Vietfox installer$' /usr/bin/vietfox; then
+            $SUDO rm -f /usr/bin/vietfox
+        fi
+        case "$(dpkg --print-architecture 2>/dev/null || true)" in
+            amd64) ENGINE_TRIPLET="x86_64-linux-gnu" ;;
+            arm64) ENGINE_TRIPLET="aarch64-linux-gnu" ;;
+            *) ENGINE_TRIPLET="" ;;
+        esac
+        if [[ -n "$ENGINE_TRIPLET" ]]; then
+            $SUDO rm -f "/usr/lib/$ENGINE_TRIPLET/fcitx5/libvietfox.so" \
+                "/usr/lib/$ENGINE_TRIPLET/fcitx5/libvietfoxmigrate.so" \
+                /usr/share/fcitx5/addon/vietfox.conf \
+                /usr/share/fcitx5/addon/vietfoxmigrate.conf \
+                /usr/share/fcitx5/inputmethod/vietfox.conf \
+                /usr/share/locale/vi/LC_MESSAGES/fcitx5-vietfox.mo
+        fi
+        $SUDO rm -f /usr/share/icons/hicolor/scalable/apps/fcitx-vietfox*.svg \
+            /usr/share/icons/hicolor/scalable/status/fcitx-vietfox*.svg
+        $SUDO gtk-update-icon-cache -f /usr/share/icons/hicolor >/dev/null 2>&1 || true
+    fi
     rm -rf "$DATA_DIR"
     rm -f "$LAUNCHER" "$DESKTOP" "$ICON" "$SETTINGS_ICON"
     command -v update-desktop-database >/dev/null && update-desktop-database "$APPS_DIR" || true
     if [[ $WITH_ENGINE -eq 1 ]]; then
-        if dpkg -s fcitx5-ngosen >/dev/null 2>&1; then
-            echo "Gói fcitx5-ngosen vẫn đang cài — không xoá engine để tránh hỏng bộ gõ."
-        else
-            ARCH_TRIPLET=""
-            case "$(uname -m)" in
-                x86_64) ARCH_TRIPLET="x86_64-linux-gnu" ;;
-                aarch64) ARCH_TRIPLET="aarch64-linux-gnu" ;;
-            esac
-            if [[ -n "$ARCH_TRIPLET" ]]; then
-                $SUDO rm -f "/usr/lib/$ARCH_TRIPLET/fcitx5/libngosen.so" \
-                    "/usr/lib/$ARCH_TRIPLET/fcitx5/libngosenmigrate.so" \
-                    /usr/share/fcitx5/addon/ngosen.conf \
-                    /usr/share/fcitx5/addon/ngosenmigrate.conf \
-                    /usr/share/fcitx5/inputmethod/ngosen.conf \
-                    /usr/share/fcitx5/ngosen/vietnamese.cm.dict \
-                    /usr/share/locale/vi/LC_MESSAGES/fcitx5-ngosen.mo
-                echo "Đã gỡ engine đi kèm."
-            fi
-        fi
+        echo "Đã gỡ engine Vietfox. Cấu hình Fcitx5 và dữ liệu người dùng vẫn được giữ nguyên."
     fi
     echo "Đã gỡ Vietfox khỏi $PREFIX."
     echo "Cấu hình người dùng vẫn còn trong ~/.config/vietfox và fcitx5."
@@ -143,16 +234,25 @@ sed "s|^Exec=.*|Exec=$LAUNCHER|" \
     "$SRC_DIR/data/io.github.vietfox.Vietfox.desktop" > "$DESKTOP"
 
 # GNOME 50.0–50.3 drops forwarded input-method keys in some applications,
-# including Chrome. Ngó Sen ships this GNOME Shell compatibility extension.
+# including Chrome. Vietfox ships a GNOME Shell compatibility extension.
 if command -v gnome-shell >/dev/null 2>&1 &&
    gnome-shell --version 2>/dev/null | grep -Eq 'GNOME Shell 50\.'; then
+    if [[ -f "$LEGACY_FORWARD_KEYS_DIR/.vietfox-managed" ]]; then
+        gnome-extensions disable "$LEGACY_FORWARD_KEYS_UUID" >/dev/null 2>&1 || true
+        rm -rf "$LEGACY_FORWARD_KEYS_DIR"
+    fi
     install -d "$FORWARD_KEYS_DIR"
     install -m 644 "$SRC_DIR/gnome-shell/$FORWARD_KEYS_UUID/extension.js" \
         "$FORWARD_KEYS_DIR/extension.js"
     install -m 644 "$SRC_DIR/gnome-shell/$FORWARD_KEYS_UUID/metadata.json" \
         "$FORWARD_KEYS_DIR/metadata.json"
     touch "$FORWARD_KEYS_DIR/.vietfox-managed"
-    echo "Đã cài phần sửa lỗi gõ cho GNOME 50. Hãy đăng xuất/đăng nhập, rồi chạy: gnome-extensions enable $FORWARD_KEYS_UUID"
+    if command -v gnome-extensions >/dev/null 2>&1 &&
+       gnome-extensions enable "$FORWARD_KEYS_UUID" >/dev/null 2>&1; then
+        echo "Đã cài và bật extension sửa lỗi gõ Chrome cho GNOME 50. Hãy đăng xuất/đăng nhập để áp dụng."
+    else
+        echo "Đã cài extension sửa lỗi gõ Chrome. Sau khi đăng xuất/đăng nhập, chạy: gnome-extensions enable $FORWARD_KEYS_UUID"
+    fi
 fi
 
 cat > "$LAUNCHER" <<EOF
@@ -169,14 +269,10 @@ install_settings_launcher() {
     local settings_launcher="/usr/bin/fcitx5-ngosen-settings"
     $SUDO install -D -m 644 "$SRC_DIR/data/io.github.vietfox.Settings.svg" \
         /usr/share/icons/hicolor/scalable/apps/io.github.vietfox.Settings.svg
-    # Fcitx action icons are looked up in the icon theme's Actions context.
-    # The previous Apps-context location caused GTK to show a missing-icon glyph.
+    # Menu action icons use the desktop's symbolic theme icons so they follow
+    # its foreground color in both light and dark appearances.
     $SUDO rm -f /usr/share/icons/hicolor/scalable/apps/io.github.vietfox.Menu.*.svg
-    local menu_icon
-    for menu_icon in "$SRC_DIR"/data/menu-icons/vietfox-*.svg; do
-        $SUDO install -D -m 644 "$menu_icon" \
-            "/usr/share/icons/hicolor/scalable/actions/$(basename "$menu_icon")"
-    done
+    $SUDO rm -f /usr/share/icons/hicolor/scalable/actions/vietfox-*.svg
     $SUDO gtk-update-icon-cache -f /usr/share/icons/hicolor >/dev/null 2>&1 || true
     if [[ -e "$settings_launcher" ]] && ! grep -q '^# Managed by Vietfox installer$' "$settings_launcher"; then
         echo "Giữ nguyên $settings_launcher hiện có; không ghi đè Settings của Ngó Sen."
@@ -223,8 +319,8 @@ install_engine() {
             ;;
     esac
     variant_dir="$SRC_DIR/engine/variants/ubuntu/$codename/$package_arch"
-    if [[ ! -f "$variant_dir/libngosen.so" || ! -f "$variant_dir/libngosenmigrate.so" ]]; then
-        echo "Chưa có engine Vietfox cho Ubuntu $codename ($package_arch)." >&2
+    if [[ ! -f "$variant_dir/libvietfox.so" ]]; then
+        echo "Chưa có engine Vietfox đã build cho Ubuntu $codename ($package_arch)." >&2
         return 1
     fi
     libdir="/usr/lib/$arch_triplet/fcitx5"
@@ -232,33 +328,64 @@ install_engine() {
 
     echo "Cài engine Vietfox cho Ubuntu $codename ($package_arch) vào $libdir…"
     $SUDO install -d "$libdir" "$sharedir/addon" "$sharedir/inputmethod" "$sharedir/ngosen"
-    $SUDO install -m 644 "$variant_dir/libngosen.so" \
-        "$variant_dir/libngosenmigrate.so" "$libdir/"
-    $SUDO install -m 644 "$SRC_DIR/engine/share/fcitx5/addon/ngosen.conf" \
-        "$SRC_DIR/engine/share/fcitx5/addon/ngosenmigrate.conf" "$sharedir/addon/"
-    $SUDO install -m 644 "$SRC_DIR/engine/share/fcitx5/inputmethod/ngosen.conf" "$sharedir/inputmethod/"
-    $SUDO install -m 644 "$SRC_DIR/engine/share/fcitx5/ngosen/vietnamese.cm.dict" "$sharedir/ngosen/"
-    $SUDO install -D -m 644 "$SRC_DIR/engine/share/locale/vi/LC_MESSAGES/fcitx5-ngosen.mo" \
-        /usr/share/locale/vi/LC_MESSAGES/fcitx5-ngosen.mo
+    $SUDO install -m 644 "$variant_dir/libvietfox.so" "$libdir/"
+    if [[ ! -f "$variant_dir/libvietfoxmigrate.so" ]]; then
+        echo "Thiếu module di trú cấu hình Vietfox: $variant_dir/libvietfoxmigrate.so" >&2
+        return 1
+    fi
+    $SUDO install -m 644 "$variant_dir/libvietfoxmigrate.so" "$libdir/"
+    $SUDO install -m 644 "$SRC_DIR/engine/share/fcitx5/addon/vietfox.conf" "$sharedir/addon/"
+    $SUDO install -m 644 "$SRC_DIR/engine/share/fcitx5/addon/vietfoxmigrate.conf" "$sharedir/addon/"
+    $SUDO install -m 644 "$SRC_DIR/engine/share/fcitx5/inputmethod/vietfox.conf" "$sharedir/inputmethod/"
+    # Earlier Vietfox installs left the old, auto-enabled Ngó Sen addon in /usr.
+    # Fcitx loads addons independently of the selected profile input method, so
+    # that stale library can still start and crash even when profile selects Vietfox.
+    $SUDO rm -f "$libdir/libngosen.so" "$libdir/libngosenmigrate.so" \
+        "$sharedir/addon/ngosen.conf" "$sharedir/addon/ngosenmigrate.conf" \
+        "$sharedir/inputmethod/ngosen.conf"
+    $SUDO cp -a "$SRC_DIR/engine/share/icons/." /usr/share/icons/
+    $SUDO rm -f /usr/share/icons/hicolor/scalable/actions/vietfox-*.svg
+    $SUDO gtk-update-icon-cache -f /usr/share/icons/hicolor >/dev/null 2>&1 || true
+    $SUDO install -D -m 644 "$SRC_DIR/engine/share/locale/vi/LC_MESSAGES/fcitx5-vietfox.mo" \
+        /usr/share/locale/vi/LC_MESSAGES/fcitx5-vietfox.mo
+    $SUDO install -m 644 "$SRC_DIR/engine/share/fcitx5/vietfox/vietnamese.cm.dict" "$sharedir/ngosen/"
 
-    if ldd "$libdir/libngosen.so" 2>/dev/null | grep -q "not found"; then
+    local engine_lib="$libdir/libvietfox.so"
+    if ldd "$engine_lib" 2>/dev/null | grep -q "not found"; then
         echo "Cảnh báo: engine thiếu thư viện:" >&2
-        ldd "$libdir/libngosen.so" | grep "not found" >&2
+        ldd "$engine_lib" | grep "not found" >&2
     fi
 
     # The bundled engine starts a fixed path for its top-bar Settings action.
     # Preserve any upstream launcher already installed at that path.
-    install_settings_launcher
+    local launcher_script quoted_launcher
+    printf -v quoted_launcher '%q' "$LAUNCHER"
+    launcher_script=$(mktemp)
+    cat > "$launcher_script" <<EOF
+#!/bin/sh
+# Managed by Vietfox installer
+user_launcher="\${HOME}/.local/bin/vietfox"
+if [ -x "\$user_launcher" ]; then
+    exec "\$user_launcher" "\$@"
+fi
+exec $quoted_launcher "\$@"
+EOF
+    $SUDO install -m 755 "$launcher_script" /usr/bin/vietfox
+    rm -f "$launcher_script"
+
+    # Select Fcitx5 for the next desktop login; the current session may still use IBus.
+    if command -v im-config >/dev/null 2>&1; then
+        if [[ -n "${SUDO_USER:-}" ]]; then
+            sudo -u "$SUDO_USER" im-config -n fcitx5
+        else
+            im-config -n fcitx5
+        fi
+        echo "Đã chọn Fcitx5 làm phương thức nhập. Đăng xuất rồi đăng nhập lại để kích hoạt."
+    fi
 }
 
 if [[ $WITH_ENGINE -eq 1 ]]; then
-    if dpkg -s fcitx5-ngosen >/dev/null 2>&1 && [[ $FORCE_ENGINE -eq 0 ]]; then
-        echo "Đã có gói fcitx5-ngosen — dùng engine hệ thống, bỏ qua bản đi kèm."
-        echo "(Dùng --force-engine nếu vẫn muốn ghi đè.)"
-        install_settings_launcher
-    else
-        install_engine
-    fi
+    install_engine
 elif dpkg -s fcitx5-ngosen >/dev/null 2>&1 || [[ -f "/usr/lib/$(uname -m)-linux-gnu/fcitx5/libngosen.so" ]]; then
     install_settings_launcher
 else
@@ -268,50 +395,90 @@ fi
 
 # ------------------------------------------------- thêm vào nhóm gõ fcitx5
 enable_input_method() {
-    local profile="$HOME/.config/fcitx5/profile"
+    local profile="$USER_HOME/.config/fcitx5/profile"
+    local input_method="${1:-ngosen}"
     if [[ ! -f "$profile" ]]; then
-        echo "Chưa có $profile — mở fcitx5 một lần rồi thêm “Vietfox” trong Cấu hình bàn phím."
+        mkdir -p "$(dirname "$profile")"
+        cat > "$profile" <<EOF
+[Groups/0]
+Name="Mặc định"
+Default Layout=us
+DefaultIM=$input_method
+
+[Groups/0/Items/0]
+Name=keyboard-us
+Layout=
+
+[Groups/0/Items/1]
+Name=$input_method
+Layout=
+
+[GroupOrder]
+0="Mặc định"
+EOF
+        echo "Đã tạo cấu hình Fcitx5 mới và chọn Vietfox làm bộ gõ mặc định."
         return 0
     fi
-    python3 - "$profile" <<'PY'
+    python3 - "$profile" "$input_method" <<'PY'
 import re
 import sys
 
 path = sys.argv[1]
+input_method = sys.argv[2]
 text = open(path, encoding="utf-8").read()
-if re.search(r"^Name=ngosen$", text, re.M):
-    print("Vietfox đã có trong nhóm gõ của fcitx5.")
-    raise SystemExit(0)
-
 lines = text.splitlines()
 start = next((i for i, line in enumerate(lines) if line.strip() == "[Groups/0]"), None)
 if start is None:
     print("Không thấy nhóm [Groups/0]; hãy thêm Vietfox bằng fcitx5-configtool.", file=sys.stderr)
     raise SystemExit(1)
 
-end = next((i for i in range(start + 1, len(lines)) if lines[i].startswith("[")), len(lines))
-indices = [int(m.group(1)) for line in lines[start:end]
-           if (m := re.match(r"\[Groups/0/Items/(\d+)\]", line.strip()))]
-new_index = max(indices, default=-1) + 1
+in_group = False
+has_method = False
+has_default = False
+indices = []
+for index, line in enumerate(lines):
+    if line.startswith("["):
+        in_group = line == "[Groups/0]" or line.startswith("[Groups/0/Items/")
+        match = re.fullmatch(r"\[Groups/0/Items/(\d+)\]", line)
+        if match:
+            indices.append(int(match.group(1)))
+    if not in_group:
+        continue
+    if line.startswith("DefaultIM="):
+        has_default = True
+        if input_method == "vietfox" and line != "DefaultIM=vietfox":
+            lines[index] = "DefaultIM=vietfox"
+    if line == f"Name={input_method}":
+        has_method = True
+    elif input_method == "vietfox" and line == "Name=ngosen":
+        lines[index] = "Name=vietfox"
+        has_method = True
 
-has_default = any(re.match(r"DefaultIM=.+", line) for line in lines[start:end])
-if not has_default:
-    insert_at = start + 1
-    while insert_at < end and lines[insert_at].startswith("#"):
+if not has_method:
+    new_index = max(indices, default=-1) + 1
+    insert_at = next((i for i, line in enumerate(lines) if line == "[GroupOrder]"), len(lines))
+    if insert_at > 0 and lines[insert_at - 1] != "":
+        lines.insert(insert_at, "")
         insert_at += 1
-    lines.insert(insert_at, "DefaultIM=ngosen")
-    end += 1
+    lines[insert_at:insert_at] = [f"[Groups/0/Items/{new_index}]", f"Name={input_method}", "Layout="]
 
-lines[end:end] = [f"[Groups/0/Items/{new_index}]", "Name=ngosen", "Layout="]
+if not has_default:
+    group_end = next((i for i in range(start + 1, len(lines)) if lines[i].startswith("[")), len(lines))
+    lines.insert(group_end, f"DefaultIM={input_method}")
+
 open(path, "w", encoding="utf-8").write("\n".join(lines) + "\n")
-print("Đã thêm Vietfox vào nhóm gõ của fcitx5.")
+print(f"Đã chọn Vietfox trong nhóm gõ của fcitx5 ({input_method}).")
 PY
 }
 
-PROFILE="$HOME/.config/fcitx5/profile"
-if command -v fcitx5 >/dev/null && [[ -f "/usr/share/fcitx5/addon/ngosen.conf" ]] && [[ -f "$PROFILE" ]]; then
-    BEFORE_HASH="$(sha256sum "$PROFILE" | cut -d' ' -f1)"
-    enable_input_method
+PROFILE="$USER_HOME/.config/fcitx5/profile"
+INPUT_METHOD_ID="ngosen"
+if [[ -f "/usr/share/fcitx5/inputmethod/vietfox.conf" ]]; then
+    INPUT_METHOD_ID="vietfox"
+fi
+if command -v fcitx5 >/dev/null && [[ -f "/usr/share/fcitx5/inputmethod/$INPUT_METHOD_ID.conf" ]]; then
+    BEFORE_HASH="$(sha256sum "$PROFILE" 2>/dev/null | cut -d' ' -f1 || true)"
+    enable_input_method "$INPUT_METHOD_ID"
     AFTER_HASH="$(sha256sum "$PROFILE" | cut -d' ' -f1)"
     if [[ "$BEFORE_HASH" != "$AFTER_HASH" ]] && pgrep -x fcitx5 >/dev/null; then
         fcitx5-remote -e >/dev/null 2>&1 || true

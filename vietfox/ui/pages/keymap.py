@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Editor for Ngó Sen's custom keymap subconfiguration."""
+"""Editor for Vietfox's custom keymap subconfiguration."""
 
 from __future__ import annotations
 
@@ -73,7 +73,7 @@ class KeymapPage(Page):
             self.switch(
                 "EnableCustomKeymap",
                 "Bật keymap tuỳ chỉnh",
-                "Các ánh xạ này được áp dụng trong engine Ngó Sen.",
+                "Các ánh xạ này được áp dụng trong engine Vietfox.",
                 False,
                 keywords="keymap ban phim tuy chinh",
             ),
@@ -157,7 +157,7 @@ class KeymapPage(Page):
             choices.append((current["Value"], current["Value"]))
         dialog = FormDialog(
             "Sửa ánh xạ phím" if index is not None else "Thêm ánh xạ phím",
-            "Mỗi phím chỉ có một thao tác. Lưu trữ trực tiếp vào cấu hình Ngó Sen.",
+            "Mỗi phím chỉ có một thao tác. Lưu trữ trực tiếp vào cấu hình Vietfox.",
             [
                 {"name": "key", "label": "Phím", "placeholder": "Ví dụ: w", "value": current.get("Key", "")},
                 {"name": "action", "label": "Thao tác", "choices": choices, "value": current.get("Value")},

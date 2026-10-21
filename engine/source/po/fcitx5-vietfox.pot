@@ -1,0 +1,1186 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-10 08:38+0700\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/vietfox-config.h:40 src/vietfox-engine.cpp:989 src/vietfox-engine.cpp:1097
+msgid "OFF"
+msgstr ""
+
+#: src/vietfox-config.h:40 src/vietfox-engine.cpp:983 src/vietfox-engine.cpp:1091
+msgid "Sen"
+msgstr ""
+
+#: src/vietfox-config.h:40 src/vietfox-engine.cpp:987 src/vietfox-engine.cpp:1095
+msgid "Preedit"
+msgstr ""
+
+#: src/vietfox-config.h:41 src/vietfox-engine.cpp:988 src/vietfox-engine.cpp:1096
+msgid "Emoji Picker"
+msgstr ""
+
+#: src/vietfox-config.h:58 src/vietfox-config.h:69 src/vietfox-config.h:81
+msgid "Disabled"
+msgstr ""
+
+#: src/vietfox-config.h:58 src/vietfox-config.h:69
+msgid "Non-Start"
+msgstr ""
+
+#: src/vietfox-config.h:58 src/vietfox-config.h:69
+msgid "Everywhere"
+msgstr ""
+
+#: src/vietfox-config.h:81
+msgid "Shift"
+msgstr ""
+
+#: src/vietfox-config.h:81
+msgid "Ctrl"
+msgstr ""
+
+#: src/vietfox-config.h:81
+msgid "Alt"
+msgstr ""
+
+#: src/vietfox-config.h:92
+msgid "Auto"
+msgstr ""
+
+#: src/vietfox-config.h:92
+msgid "Light"
+msgstr ""
+
+#: src/vietfox-config.h:92
+msgid "Dark"
+msgstr ""
+
+#: src/vietfox-config.h:199
+msgid "Key"
+msgstr ""
+
+#: src/vietfox-config.h:199
+msgid "Value"
+msgstr ""
+
+#: src/vietfox-config.h:203 src/vietfox-config.h:274 src/vietfox-engine.cpp:243
+#: src/vietfox-engine.cpp:383
+msgid "Macro"
+msgstr ""
+
+#: src/vietfox-config.h:207 src/vietfox-config.h:247 src/vietfox-config.h:275
+msgid "Custom Keymap"
+msgstr ""
+
+#: src/vietfox-config.h:209
+msgid "App"
+msgstr ""
+
+#: src/vietfox-config.h:209 src/vietfox-config.h:220
+msgid "Mode"
+msgstr ""
+
+#: src/vietfox-config.h:212
+msgid "Rules"
+msgstr ""
+
+#: src/vietfox-config.h:222
+msgid "Input Method"
+msgstr ""
+
+#: src/vietfox-config.h:223
+msgid "Output Charset"
+msgstr ""
+
+#: src/vietfox-config.h:225
+msgid "Mode Menu Hotkey"
+msgstr ""
+
+#: src/vietfox-config.h:226
+msgid "Cycle Mode Hotkey"
+msgstr ""
+
+#: src/vietfox-config.h:227
+msgid "App Rules"
+msgstr ""
+
+#: src/vietfox-config.h:228
+msgid "Type w to Produce ư"
+msgstr ""
+
+#: src/vietfox-config.h:229
+msgid "Type [ -> ơ, ] -> ư, { -> Ơ, } -> Ư"
+msgstr ""
+
+#: src/vietfox-config.h:232
+msgid "Enable Spell Check Using Dictionary"
+msgstr ""
+
+#: src/vietfox-config.h:232
+msgid "Enable Macro"
+msgstr ""
+
+#: src/vietfox-config.h:233 src/vietfox-engine.cpp:244 src/vietfox-engine.cpp:384
+msgid "Capitalize Macro"
+msgstr ""
+
+#: src/vietfox-config.h:235
+msgid "Modifier to Skip Macro for Next Word"
+msgstr ""
+
+#: src/vietfox-config.h:236
+msgid "Auto capitalize after sentence-ending punctuation (. ! ? Enter)"
+msgstr ""
+
+#: src/vietfox-config.h:237
+msgid "Double Space to Period"
+msgstr ""
+
+#: src/vietfox-config.h:238
+msgid "Double Hyphen to Em-Dash (--)"
+msgstr ""
+
+#: src/vietfox-config.h:239
+msgid "Retype text typed before switching on"
+msgstr ""
+
+#: src/vietfox-config.h:239 src/vietfox-engine.cpp:246
+msgid "Auto Restore Invalid Words"
+msgstr ""
+
+#: src/vietfox-config.h:240
+msgid "Use oà, uý (Instead Of òa, úy)"
+msgstr ""
+
+#: src/vietfox-config.h:241
+msgid "Allow Type With More Freedom"
+msgstr ""
+
+#: src/vietfox-config.h
+msgid "Backspace Removes the Tone Mark"
+msgstr ""
+
+#: src/vietfox-config.h:242
+msgid "Allow dd To Produce đ When Auto Restore Invalid Words Is On"
+msgstr ""
+
+#: src/vietfox-config.h:243
+msgid "Fix Uinput Mode With Ack"
+msgstr ""
+
+#: src/vietfox-config.h:244
+msgid "Use Ngó Sen Status Icons"
+msgstr ""
+
+#: src/vietfox-config.h:246 src/vietfox-engine.cpp:248 src/vietfox-engine.cpp:386
+msgid "Custom Dictionary"
+msgstr ""
+
+#: src/vietfox-config.h:249
+msgid "Show Sen"
+msgstr ""
+
+#: src/vietfox-config.h:250
+msgid "Shortcut for Sen"
+msgstr ""
+
+#: src/vietfox-config.h:259
+msgid "Show Preedit"
+msgstr ""
+
+#: src/vietfox-config.h:260
+msgid "Shortcut for Preedit"
+msgstr ""
+
+#: src/vietfox-config.h:261
+msgid "Show Emoji Picker"
+msgstr ""
+
+#: src/vietfox-config.h:262
+msgid "Shortcut for Emoji Picker"
+msgstr ""
+
+#: src/vietfox-config.h:262
+msgid "Show OFF"
+msgstr ""
+
+#: src/vietfox-config.h:263
+msgid "Shortcut for OFF"
+msgstr ""
+
+#: src/vietfox-config.h:263
+msgid "Show Default Typing"
+msgstr ""
+
+#: src/vietfox-config.h:264
+msgid "Shortcut for Default Typing"
+msgstr ""
+
+#: src/vietfox-config.h:265
+msgid "Allow Macro in Off Mode"
+msgstr ""
+
+#: src/vietfox-config.h:269
+msgid "Mode Order"
+msgstr ""
+
+#: src/vietfox-config.h:271
+msgid "Time Format ($TIME in macro)"
+msgstr ""
+
+#: src/vietfox-config.h:272
+msgid "Date Format ($DATE in macro)"
+msgstr ""
+
+#: src/vietfox-config.h:276
+msgid "Icon Color"
+msgstr ""
+
+#: src/vietfox-engine.cpp:215
+msgid "Charset"
+msgstr ""
+
+#: src/vietfox-engine.cpp:242 src/vietfox-engine.cpp:382
+msgid "Spell Check"
+msgstr ""
+
+#: src/vietfox-engine.cpp:246 src/vietfox-engine.cpp:385
+msgid "Auto Non-VN Restore"
+msgstr ""
+
+#: src/vietfox-engine.cpp:252
+msgid "Settings"
+msgstr ""
+
+#: src/vietfox-engine.cpp:991 src/vietfox-engine.cpp:1030
+msgid "Default Typing"
+msgstr ""
+
+#: src/vietfox-engine.cpp:1057
+msgid "Type"
+msgstr ""
+
+#: src/vietfox-engine.cpp:1074
+msgid "App: "
+msgstr ""
+
+#: src/vietfox-engine.cpp:1099
+msgid "Unknown Mode"
+msgstr ""
+
+#: src/vietfox-engine.cpp:1204
+msgid "Ngó Sen - Off"
+msgstr ""
+
+#: src/lotus-state.cpp:241
+msgid "Page "
+msgstr ""
+
+#: src/core/vietfox-state-retype.cpp
+msgid "Tab: retype in Vietnamese, Esc: keep"
+msgstr ""
+
+#: src/core/vietfox-state-retype.cpp
+msgid "Esc: put back what was typed"
+msgstr ""
+
+#: io.github.vietfox.Vietfox.metainfo.xml.in.in:7
+msgid "Ngó Sen"
+msgstr ""
+
+#: io.github.vietfox.Vietfox.metainfo.xml.in.in:8
+msgid "Vietnamese input method (Ngó Sen)"
+msgstr ""
+
+#: io.github.vietfox.Vietfox.metainfo.xml.in.in:10
+msgid ""
+"Ngó Sen is a Vietnamese input method for Fcitx5, supporting multiple typing "
+"modes and input methods."
+msgstr ""
+
+msgid "Ngó Sen Wrapper For Fcitx"
+msgstr ""
+
+#: settings-gui/ui/pages/about.py:75
+#, python-brace-format
+msgid "Version {}"
+msgstr ""
+
+#: settings-gui/ui/pages/about.py:90
+msgid "Modern, fast, and stable Vietnamese input method for Linux."
+msgstr ""
+
+#: settings-gui/ui/pages/about.py:103
+msgid "Report Bug"
+msgstr ""
+
+#: settings-gui/ui/pages/about.py:112
+msgid "Request Feature"
+msgstr ""
+
+
+#: settings-gui/ui/pages/about.py:148
+msgid "Developed by Nguyen Phi"
+msgstr ""
+
+#: settings-gui/ui/pages/about.py
+#, python-brace-format
+msgid "Based on the code of {lotus} and {vmk}."
+msgstr ""
+
+#: settings-gui/ui/pages/about.py:184
+msgid "Licensed under the GNU General Public License v3.0"
+msgstr ""
+
+
+#: settings-gui/ui/pages/about.py:248 settings-gui/ui/pages/backup.py:169
+#: settings-gui/ui/pages/backup.py:290 settings-gui/ui/main_window.py:307
+msgid "Success"
+msgstr ""
+
+
+#: settings-gui/ui/pages/about.py:251 settings-gui/ui/pages/backup.py:172
+#: settings-gui/ui/pages/backup.py:222 settings-gui/ui/pages/backup.py:282
+#: settings-gui/ui/pages/backup.py:305 settings-gui/ui/pages/dict_editor.py:249
+#: settings-gui/ui/pages/dict_editor.py:294 settings-gui/ui/main_window.py:298
+msgid "Error"
+msgstr ""
+
+
+#: settings-gui/ui/pages/backup.py:53
+msgid "Backup & Restore"
+msgstr ""
+
+#: settings-gui/ui/pages/backup.py:58
+msgid "Export/Import Settings"
+msgstr ""
+
+#: settings-gui/ui/pages/backup.py:61
+msgid ""
+"Save or restore configuration via JSON files. Select components to include:"
+msgstr ""
+
+#: settings-gui/ui/pages/backup.py:69 settings-gui/ui/pages/backup.py:199
+#: settings-gui/ui/pages/backup.py:253
+msgid "Main Settings"
+msgstr ""
+
+#: settings-gui/ui/pages/backup.py:70 settings-gui/ui/pages/backup.py:200
+#: settings-gui/ui/pages/backup.py:257 settings-gui/ui/pages/macro_editor.py:52
+#: settings-gui/ui/main_window.py:219
+msgid "Macros"
+msgstr ""
+
+#: settings-gui/ui/pages/backup.py:71 settings-gui/ui/pages/backup.py:201
+#: settings-gui/ui/pages/backup.py:263
+msgid "Custom Keymaps"
+msgstr ""
+
+#: settings-gui/ui/pages/backup.py:72 settings-gui/ui/pages/backup.py:202
+#: settings-gui/ui/pages/backup.py:267
+msgid "Application Rules"
+msgstr ""
+
+#: settings-gui/ui/pages/backup.py:83
+msgid "Export Backup..."
+msgstr ""
+
+#: settings-gui/ui/pages/backup.py:87
+msgid "Import Backup..."
+msgstr ""
+
+#: settings-gui/ui/pages/backup.py:96
+msgid "Items found in backup:"
+msgstr ""
+
+#: settings-gui/ui/pages/backup.py:101
+msgid "Restore Selected Now"
+msgstr ""
+
+#: settings-gui/ui/pages/backup.py:122 settings-gui/ui/pages/backup.py:231
+#: settings-gui/ui/pages/dict_editor.py:185
+msgid "Warning"
+msgstr ""
+
+#: settings-gui/ui/pages/backup.py:122
+msgid "Select at least one item to export."
+msgstr ""
+
+#: settings-gui/ui/pages/backup.py:128
+msgid "Export Backup"
+msgstr ""
+
+#: settings-gui/ui/pages/backup.py:130 settings-gui/ui/pages/backup.py:180
+msgid "JSON Backup (*.json);;All Files (*)"
+msgstr ""
+
+#: settings-gui/ui/pages/backup.py:169
+msgid "Backup exported to:\n"
+msgstr ""
+
+#: settings-gui/ui/pages/backup.py:172
+msgid "Failed to export backup:\n"
+msgstr ""
+
+#: settings-gui/ui/pages/backup.py:178
+msgid "Select Backup File"
+msgstr ""
+
+#: settings-gui/ui/pages/backup.py:216
+msgid "Invalid backup file: No recognizable components found."
+msgstr ""
+
+#: settings-gui/ui/pages/backup.py:222
+msgid "Failed to open backup file:\n"
+msgstr ""
+
+#: settings-gui/ui/pages/backup.py:231
+msgid "Select at least one item to restore."
+msgstr ""
+
+#: settings-gui/ui/pages/backup.py:236
+msgid "Confirm Restore"
+msgstr ""
+
+#: settings-gui/ui/pages/backup.py:238
+msgid ""
+"Are you sure you want to restore selected components? This will overwrite "
+"current configuration."
+msgstr ""
+
+#: settings-gui/ui/pages/backup.py:283
+msgid ""
+"Failed to restore the following components:\n"
+"- "
+msgstr ""
+
+#: settings-gui/ui/pages/backup.py:291
+msgid ""
+"Selected components restored. Fcitx5 restart may be required for some "
+"changes."
+msgstr ""
+
+#: settings-gui/ui/pages/backup.py:305
+msgid "Failed to restore backup:\n"
+msgstr ""
+
+#: settings-gui/ui/pages/dict_editor.py:76
+msgid ""
+"Words in the custom dictionary will be excluded from 'Auto Restore Invalid "
+"Words'. Use this for names, technical terms, or words not yet in the built-"
+"in dictionary."
+msgstr ""
+
+#: settings-gui/ui/pages/dict_editor.py:92
+msgid "Search words..."
+msgstr ""
+
+#: settings-gui/ui/pages/dict_editor.py:96
+#: settings-gui/ui/pages/keymap_editor.py:237
+#: settings-gui/ui/pages/macro_editor.py:230
+msgid "Search:"
+msgstr ""
+
+#: settings-gui/ui/pages/dict_editor.py:111
+msgid "Word (e.g. khongdau)"
+msgstr ""
+
+#: settings-gui/ui/pages/dict_editor.py:115
+#: settings-gui/ui/pages/dict_editor.py:367
+#: settings-gui/ui/pages/keymap_editor.py:274
+#: settings-gui/ui/pages/keymap_editor.py:453
+#: settings-gui/ui/pages/macro_editor.py:188
+#: settings-gui/ui/pages/macro_editor.py:488
+msgid "Add"
+msgstr ""
+
+#: settings-gui/ui/pages/dict_editor.py:119
+msgid "Word:"
+msgstr ""
+
+#: settings-gui/ui/pages/dict_editor.py:141
+#: settings-gui/ui/pages/keymap_editor.py:300
+#: settings-gui/ui/pages/macro_editor.py:216
+#: settings-gui/ui/pages/mode_manager.py:419
+msgid "Remove"
+msgstr ""
+
+#: settings-gui/ui/pages/dict_editor.py:187
+#, python-brace-format
+msgid ""
+"Failed to load dictionary completely: {}\n"
+"Saving is disabled to prevent data loss."
+msgstr ""
+
+#: settings-gui/ui/pages/dict_editor.py:251
+msgid ""
+"Cannot save dictionary because loading failed earlier. Please fix the file "
+"format first."
+msgstr ""
+
+#: settings-gui/ui/pages/dict_editor.py:294
+#, python-brace-format
+msgid "Failed to save dictionary: {}"
+msgstr ""
+
+#: settings-gui/ui/pages/dict_editor.py:322
+#: settings-gui/ui/pages/dict_editor.py:354
+msgid "Warning: Dictionary words should not contain spaces."
+msgstr ""
+
+#: settings-gui/ui/pages/dict_editor.py:363
+msgid "Exists"
+msgstr ""
+
+#: settings-gui/ui/pages/dynamic_settings.py:79
+msgid "Configure basic input method settings and behaviors."
+msgstr ""
+
+#: settings-gui/ui/pages/dynamic_settings.py:81
+msgid "Customize the look and feel of the Ngó Sen status icons and theme."
+msgstr ""
+
+#: settings-gui/ui/pages/dynamic_settings.py:83
+msgid "Fine-tune spelling corrections and advanced typing options."
+msgstr ""
+
+#: settings-gui/ui/pages/dynamic_settings.py:84
+msgid "Manage input mode shortcuts, display order, and fast cycling."
+msgstr ""
+
+#: settings-gui/ui/pages/dynamic_settings.py:89
+msgid ""
+"Assign hotkeys to open the mode menu or quickly cycle through enabled modes."
+msgstr ""
+
+#: settings-gui/ui/pages/dynamic_settings.py:214
+msgid "Failed to load configuration."
+msgstr ""
+
+#: settings-gui/ui/pages/dynamic_settings.py:255
+msgid ""
+"Drag the handle on the left to reorder modes in the menu. Use checkboxes to "
+"toggle visibility, and click the buttons to reassign shortcuts."
+msgstr ""
+
+#: settings-gui/ui/pages/dynamic_settings.py:287
+msgid "No interface settings available yet."
+msgstr ""
+
+#: settings-gui/ui/pages/dynamic_settings.py:574
+#, python-brace-format
+msgid "Duplicate shortcut '{}' used for multiple enabled modes."
+msgstr ""
+
+#: settings-gui/ui/pages/keymap_editor.py:217
+#: settings-gui/ui/main_window.py:221
+msgid "Keymap"
+msgstr ""
+
+#: settings-gui/ui/pages/keymap_editor.py:233
+msgid "Search keys..."
+msgstr ""
+
+#: settings-gui/ui/pages/keymap_editor.py:243
+msgid "Original Input Method:"
+msgstr ""
+
+#: settings-gui/ui/pages/keymap_editor.py:248
+msgid "Apply Preset"
+msgstr ""
+
+#: settings-gui/ui/pages/keymap_editor.py:266
+msgid "Key (Example: s)"
+msgstr ""
+
+#: settings-gui/ui/pages/keymap_editor.py:275
+#: settings-gui/ui/pages/keymap_editor.py:454
+msgid "Add Keymap"
+msgstr ""
+
+#: settings-gui/ui/pages/keymap_editor.py:286
+msgid "Action"
+msgstr ""
+
+#: settings-gui/ui/pages/keymap_editor.py:301
+msgid "Remove selected row"
+msgstr ""
+
+#: settings-gui/ui/pages/keymap_editor.py:449
+#: settings-gui/ui/pages/macro_editor.py:485
+msgid "Update"
+msgstr ""
+
+#: settings-gui/ui/pages/keymap_editor.py:450
+msgid "Update Keymap"
+msgstr ""
+
+#: settings-gui/ui/pages/keymap_editor.py:461
+msgid "Confirm"
+msgstr ""
+
+#: settings-gui/ui/pages/keymap_editor.py:462
+msgid "This operation will replace all existing keys with "
+msgstr ""
+
+#: settings-gui/ui/pages/keymap_editor.py:464
+msgid ". Are you sure?"
+msgstr ""
+
+#: settings-gui/ui/pages/macro_editor.py:61
+msgid "Macro in Off Mode"
+msgstr ""
+
+#: settings-gui/ui/pages/macro_editor.py:84
+msgid "Modifier to Skip Macro for Next Word:"
+msgstr ""
+
+#: settings-gui/ui/pages/macro_editor.py:93
+msgid "Search macros..."
+msgstr ""
+
+#: settings-gui/ui/pages/macro_editor.py:113
+msgid "Macros support dynamic placeholders: $TIME and $DATE."
+msgstr ""
+
+#: settings-gui/ui/pages/macro_editor.py:135
+#: settings-gui/ui/pages/macro_editor.py:158 settings-gui/ui/components.py:336
+#: settings-gui/ui/components.py:454
+msgid "None"
+msgstr ""
+
+#: settings-gui/ui/pages/macro_editor.py:143
+msgid "Time Format:"
+msgstr ""
+
+#: settings-gui/ui/pages/macro_editor.py:166
+msgid "Date Format:"
+msgstr ""
+
+#: settings-gui/ui/pages/macro_editor.py:180
+msgid "Abbreviation (e.g. kg)"
+msgstr ""
+
+#: settings-gui/ui/pages/macro_editor.py:184
+msgid "Full text (e.g. khô gà)"
+msgstr ""
+
+#: settings-gui/ui/pages/macro_editor.py:193
+msgid "Key:"
+msgstr ""
+
+#: settings-gui/ui/pages/macro_editor.py:195
+msgid "Value:"
+msgstr ""
+
+#: settings-gui/ui/pages/macro_editor.py:202
+msgid "Abbreviation"
+msgstr ""
+
+#: settings-gui/ui/pages/macro_editor.py:202
+msgid "Expanded Text"
+msgstr ""
+
+#: settings-gui/ui/pages/macro_editor.py:218
+msgid "Move Up"
+msgstr ""
+
+#: settings-gui/ui/pages/macro_editor.py:220
+msgid "Move Down"
+msgstr ""
+
+#: settings-gui/ui/pages/macro_editor.py:429
+#: settings-gui/ui/pages/macro_editor.py:474
+msgid "Macro keys cannot contain spaces or special characters."
+msgstr ""
+
+#: settings-gui/ui/pages/mode_manager.py:120
+#: settings-gui/ui/pages/mode_manager.py:133
+#: settings-gui/ui/pages/mode_manager.py:418
+msgid "Add Application"
+msgstr ""
+
+#: settings-gui/ui/pages/mode_manager.py:135
+msgid "Assign an input mode to a specific application."
+msgstr ""
+
+#: settings-gui/ui/pages/mode_manager.py:150
+msgid "Search process name..."
+msgstr ""
+
+#: settings-gui/ui/pages/mode_manager.py:154
+msgid "Refresh Process List"
+msgstr ""
+
+#: settings-gui/ui/pages/mode_manager.py:168
+msgid "Running"
+msgstr ""
+
+#: settings-gui/ui/pages/mode_manager.py:174
+msgid "Enter application name or path..."
+msgstr ""
+
+#: settings-gui/ui/pages/mode_manager.py:178
+msgid "Manual input"
+msgstr ""
+
+#: settings-gui/ui/pages/mode_manager.py:182
+msgid "No application selected"
+msgstr ""
+
+#: settings-gui/ui/pages/mode_manager.py:185 settings-gui/ui/main_window.py:148
+msgid "&Cancel"
+msgstr ""
+
+#: settings-gui/ui/pages/mode_manager.py:188
+msgid "&Add"
+msgstr ""
+
+#: settings-gui/ui/pages/mode_manager.py:366
+msgid "Selected:"
+msgstr ""
+
+#: settings-gui/ui/pages/mode_manager.py:407
+msgid "Search applications..."
+msgstr ""
+
+#: settings-gui/ui/pages/mode_manager.py:440 settings-gui/ui/main_window.py:218
+msgid "Applications"
+msgstr ""
+
+#: settings-gui/ui/pages/mode_manager.py:447
+msgid "Global Default Mode:"
+msgstr ""
+
+#: settings-gui/ui/pages/mode_manager.py:475
+msgid "Select an application"
+msgstr ""
+
+#: settings-gui/ui/pages/mode_manager.py:715
+msgid "Confirm Remove"
+msgstr ""
+
+#: settings-gui/ui/pages/mode_manager.py:716
+msgid "Remove rules for this application?"
+msgstr ""
+
+#: settings-gui/ui/components.py:249
+msgid "Clear hotkey"
+msgstr ""
+
+#: settings-gui/ui/components.py:322
+msgid "[ Recording... ]"
+msgstr ""
+
+#: settings-gui/ui/components.py:450
+msgid "[ Press Key... ]"
+msgstr ""
+
+#: settings-gui/ui/helpers.py:14
+msgid "Text goes straight into the field, without an underline."
+msgstr ""
+
+#: settings-gui/ui/helpers.py:14
+msgid "You can type tone marks at the end of the word or anywhere inside."
+msgstr ""
+
+#: settings-gui/ui/helpers.py:16
+msgid ""
+"Fix typing issues in Uinput mode for Chromium-based browsers like Chrome or "
+"Edge."
+msgstr ""
+
+#: settings-gui/ui/helpers.py:19
+msgid ""
+"Automatically match expansion case to trigger key case.\n"
+"\n"
+"Example if 'kg' is 'Khô gà':\n"
+"- kg -> khô gà\n"
+"- Kg -> Khô gà\n"
+"- KG -> KHÔ GÀ"
+msgstr ""
+
+#: settings-gui/ui/helpers.py:26
+msgid ""
+"Automatically revert the typed sequence if the resulting word is not in the "
+"dictionary.\n"
+"This helps prevent accidental Vietnamese transformations on English words or "
+"mixed text."
+msgstr ""
+
+#: settings-gui/ui/helpers.py:30
+msgid ""
+"Allow macros to work when the input mode is OFF.\n"
+"When disabled, macros are only available in active typing modes."
+msgstr ""
+
+#: settings-gui/ui/helpers.py:34
+msgid ""
+"Press and release the selected modifier key before typing to skip macro "
+"expansion for the next word.\n"
+"If another key is pressed between the modifier's press and release, the skip "
+"is cancelled."
+msgstr ""
+
+#: settings-gui/ui/main_window.py:33
+#: settings-gui/io.github.ngosen.NgoSen.Settings.desktop.in:2
+msgid "Ngó Sen Settings"
+msgstr ""
+
+#: settings-gui/ui/main_window.py:142
+msgid "&Reset"
+msgstr ""
+
+#: settings-gui/ui/main_window.py:153
+msgid "&Apply"
+msgstr ""
+
+#: settings-gui/ui/main_window.py:158
+msgid "&OK"
+msgstr ""
+
+#: settings-gui/ui/main_window.py:216
+msgid "General"
+msgstr ""
+
+#: settings-gui/ui/main_window.py:217
+msgid "Typing"
+msgstr ""
+
+#: settings-gui/ui/main_window.py:220
+msgid "Dictionary"
+msgstr ""
+
+#: settings-gui/ui/main_window.py:222
+msgid "Shortcuts"
+msgstr ""
+
+#: settings-gui/ui/main_window.py:223
+msgid "Appearance"
+msgstr ""
+
+#: settings-gui/ui/main_window.py:224
+msgid "Backup"
+msgstr ""
+
+#: settings-gui/ui/main_window.py:230
+msgid "About"
+msgstr ""
+
+#: settings-gui/ui/main_window.py:238
+msgid "Confirm Reset"
+msgstr ""
+
+#: settings-gui/ui/main_window.py:239
+msgid "Restore all settings to defaults?"
+msgstr ""
+
+#: settings-gui/ui/main_window.py:287
+msgid "Cannot Save"
+msgstr ""
+
+#: settings-gui/ui/main_window.py:299
+msgid "Failed to save settings. Please check if Fcitx5 is running."
+msgstr ""
+
+#: settings-gui/ui/main_window.py:307
+msgid "Settings saved."
+msgstr ""
+
+#: settings-gui/io.github.ngosen.NgoSen.Settings.desktop.in:3
+msgid "Configure the Ngó Sen input method"
+msgstr ""
+
+msgid "Save typing log"
+msgstr ""
+
+msgid "Typing log saved: "
+msgstr ""
+
+msgid "Could not save the typing log to "
+msgstr ""
+
+#: settings-gui/ui/main_window.py
+msgid "Cannot reach fcitx5, so changes will not be saved."
+msgstr ""
+
+#: settings-gui/ui/main_window.py
+msgid "&Undo"
+msgstr ""
+
+#: settings-gui/ui/main_window.py
+msgid "Defaults restored."
+msgstr ""
+
+#: settings-gui/ui/main_window.py
+msgid "Saved “{}”."
+msgstr ""
+
+#: settings-gui/ui/main_window.py
+msgid "Saved."
+msgstr ""
+
+#: settings-gui/ui/main_window.py
+msgid "Could not save. Check that fcitx5 is running."
+msgstr ""
+
+#: settings-gui/ui/main_window.py
+msgid "Could not undo. Check that fcitx5 is running."
+msgstr ""
+
+#: settings-gui/ui/main_window.py
+msgid "Change undone."
+msgstr ""
+
+#: settings-gui/ui/pages/dynamic_settings.py
+msgid "Tone marks"
+msgstr ""
+
+#: settings-gui/ui/pages/dynamic_settings.py
+msgid "Quick typing"
+msgstr ""
+
+#: settings-gui/ui/pages/dynamic_settings.py
+msgid "Hotkeys"
+msgstr ""
+
+#: settings-gui/ui/pages/dynamic_settings.py
+msgid "Tray icon"
+msgstr ""
+
+#: settings-gui/ui/pages/dynamic_settings.py
+msgid "Mode switching"
+msgstr ""
+
+#: settings-gui/ui/pages/dynamic_settings.py
+msgid "Try it:"
+msgstr ""
+
+#: settings-gui/ui/pages/dynamic_settings.py
+msgid "Type here to test"
+msgstr ""
+
+#: settings-gui/ui/pages/dynamic_settings.py
+msgid "Words that are not Vietnamese get no tone marks."
+msgstr ""
+
+#: settings-gui/ui/pages/dynamic_settings.py
+msgid "Typing windows still gives windows."
+msgstr ""
+
+#: settings-gui/ui/pages/dynamic_settings.py
+msgid "Tone marks can also go at the end of the word."
+msgstr ""
+
+#: settings-gui/ui/pages/dynamic_settings.py
+msgid "z in Telex (0 in VNI) removes the tone mark even with this off. On a word without one, Backspace deletes as usual."
+msgstr ""
+
+#: settings-gui/ui/pages/dynamic_settings.py
+msgid "Custom has no keys yet: turn on Custom Keymap and add keys in Keys › Keymap."
+msgstr ""
+
+#: settings-gui/ui/main_window.py
+msgid "&Defaults"
+msgstr ""
+
+#: settings-gui/ui/main_window.py
+msgid "Back &Up…"
+msgstr ""
+
+#: settings-gui/ui/main_window.py
+msgid "Res&tore…"
+msgstr ""
+
+#: settings-gui/ui/main_window.py
+msgid "Macros & Dictionary"
+msgstr ""
+
+#: settings-gui/ui/main_window.py
+msgid "Keys"
+msgstr ""
+
+#: settings-gui/ui/main_window.py
+msgid "More"
+msgstr ""
+
+#: settings-gui/ui/main_window.py
+msgid "Backed up to {}."
+msgstr ""
+
+#: settings-gui/ui/main_window.py
+msgid "Restored from {}."
+msgstr ""
+
+#: settings-gui/ui/main_window.py
+msgid "Could not restore. Check that fcitx5 is running."
+msgstr ""
+
+#: settings-gui/ui/main_window.py
+msgid "Search settings"
+msgstr ""
+
+#: settings-gui/ui/main_window.py
+msgid "No settings found"
+msgstr ""
+
+#: settings-gui/ui/pages/about.py
+msgid "Check my machine…"
+msgstr ""
+
+#: settings-gui/ui/system_check_dialog.py
+msgid "Check my machine"
+msgstr ""
+
+#: settings-gui/ui/system_check_dialog.py
+msgid "How fcitx5 is set up on this machine. Nothing is sent until you send a bug report, and it lists the apps below, so read it before sending."
+msgstr ""
+
+#: settings-gui/ui/system_check_dialog.py
+msgid "Check again"
+msgstr ""
+
+#: settings-gui/ui/system_check_dialog.py
+msgid "Copy result"
+msgstr ""
+
+#: settings-gui/ui/system_check_dialog.py
+msgid "Report bug…"
+msgstr ""
+
+#: settings-gui/ui/system_check_dialog.py
+#, python-brace-format
+msgid "Apps connected to fcitx5: {}"
+msgstr ""
+
+#: settings-gui/ui/system_check_dialog.py
+msgid "No setup problem found"
+msgstr ""
+
+#: settings-gui/core/system_check.py
+#, python-brace-format
+msgid "Set {} in the session environment."
+msgstr ""
+
+#: settings-gui/core/system_check.py
+msgid "fcitx5 is not running"
+msgstr ""
+
+#: settings-gui/core/system_check.py
+msgid "Start Fcitx 5 from the application menu, or run fcitx5 -d."
+msgstr ""
+
+#: settings-gui/core/system_check.py
+msgid "Ngó Sen is not in the fcitx5 input method list"
+msgstr ""
+
+#: settings-gui/core/system_check.py
+msgid "Open Fcitx 5 Configuration and add Ngó Sen under Input Method."
+msgstr ""
+
+#: settings-gui/core/system_check.py
+msgid "Older X11 apps have no input method"
+msgstr ""
+
+#: settings-gui/core/system_check.py
+msgid "IBus is running next to fcitx5"
+msgstr ""
+
+#: settings-gui/core/system_check.py
+msgid "Two input methods compete for keys; stop IBus from starting at login."
+msgstr ""
+
+#: settings-gui/core/system_check.py
+msgid "Qt apps have no input method"
+msgstr ""
+
+#: settings-gui/core/system_check.py
+msgid "Chrome and older GTK apps may have no input method"
+msgstr ""
+
+#: settings-gui/core/system_check.py
+msgid "GTK apps have no input method"
+msgstr ""
+
+#: settings-gui/core/system_check.py
+msgid "KDE does not start fcitx5 as its virtual keyboard"
+msgstr ""
+
+#: settings-gui/core/system_check.py
+msgid "System Settings → Keyboard → Virtual Keyboard: choose Fcitx 5."
+msgstr ""
+
+#: settings-gui/core/system_check.py
+msgid "GTK_IM_MODULE or QT_IM_MODULE is set on KDE Wayland"
+msgstr ""
+
+#: settings-gui/core/system_check.py
+msgid "KDE Wayland does not need them, and the candidate window may flicker."
+msgstr ""
+
+#: settings-gui/core/system_check.py
+msgid "Qt 5 apps have no input method"
+msgstr ""
+
+#: settings-gui/ui/system_check_dialog.py
+msgid "Test an app"
+msgstr ""
+
+#: settings-gui/ui/system_check_dialog.py
+#, python-brace-format
+msgid "Open the app, switch to Ngó Sen and type “{sample}” ({telex} in Telex). Then choose “Save typing log” in the Ngó Sen menu and read the log here."
+msgstr ""
+
+#: settings-gui/ui/system_check_dialog.py
+msgid "Read typing log"
+msgstr ""
+
+#: settings-gui/ui/system_check_dialog.py
+msgid "It typed right"
+msgstr ""
+
+#: settings-gui/ui/system_check_dialog.py
+msgid "It typed wrong"
+msgstr ""
+
+#: settings-gui/ui/system_check_dialog.py
+#, python-brace-format
+msgid "{app} got the sample right."
+msgstr ""
+
+#: settings-gui/ui/system_check_dialog.py
+#, python-brace-format
+msgid "{app} got the sample wrong."
+msgstr ""
+
+#: settings-gui/ui/system_check_dialog.py
+#, python-brace-format
+msgid "{app} does not tell Ngó Sen its text. Did the sample come out right?"
+msgstr ""
+
+#: settings-gui/ui/system_check_dialog.py
+#, python-brace-format
+msgid "The app shows: {}"
+msgstr ""
+
+#: settings-gui/ui/system_check_dialog.py
+msgid "No typing log found. Save one from the Ngó Sen menu first."
+msgstr ""
+
+#: settings-gui/ui/system_check_dialog.py
+msgid "The log has no typing in it. Type the sample, then save the log again."
+msgstr ""

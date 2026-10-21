@@ -1,0 +1,125 @@
+/*
+ * SPDX-FileCopyrightText: 2022-2022 CSSlayer <wengxt@gmail.com>
+ * SPDX-FileCopyrightText: 2025 Võ Ngô Hoàng Thành <thanhpy2009@gmail.com>
+ * SPDX-FileCopyrightText: 2026 Nguyễn Hoàng Kỳ  <nhktmdzhg@gmail.com>
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
+ */
+
+/**
+ * @file vietfox-go-object.h
+ * @brief Owners for objects and strings handed over by the Go composition engine.
+ */
+
+#pragma once
+
+#include "bamboo-core.h"
+#include <cstdlib>
+#include <memory>
+#include <optional>
+
+namespace ngosen {
+
+    struct FreeDeleter {
+        void operator()(void* p) const {
+            std::free(p);
+        }
+    };
+
+    // Owns memory the Go side handed over (it allocates with malloc).
+    template <typename T>
+    using UniqueCPtr = std::unique_ptr<T, FreeDeleter>;
+
+    /**
+     * @brief RAII wrapper for CGo handles.
+     *
+     * Manages lifecycle of Go objects accessed from C++ through uintptr_t handles.
+     * Automatically releases handles on destruction.
+     */
+    class CGoObject {
+      public:
+        /**
+         * @brief Constructs with optional handle.
+         * @param handle Optional CGo handle.
+         */
+        CGoObject(std::optional<uintptr_t> handle = std::nullopt) : handle_(handle) {}
+
+        /**
+         * @brief Releases the handle on destruction.
+         */
+        ~CGoObject() {
+            if (handle_) {
+                DeleteObject(*handle_);
+            }
+        }
+
+        CGoObject(const CGoObject&)            = delete;
+        CGoObject& operator=(const CGoObject&) = delete;
+
+        CGoObject(CGoObject&& other) noexcept : handle_(other.handle_) {
+            other.handle_ = std::nullopt;
+        }
+
+        CGoObject& operator=(CGoObject&& other) noexcept {
+            if (this != &other) {
+                clear();
+                handle_       = other.handle_;
+                other.handle_ = std::nullopt;
+            }
+            return *this;
+        }
+
+        /**
+         * @brief Resets with a new handle, releasing the old one.
+         * @param handle New handle to store.
+         */
+        void reset(std::optional<uintptr_t> handle = std::nullopt) {
+            clear();
+            handle_ = handle;
+        }
+
+        /**
+         * @brief Gets the stored handle.
+         * @return The handle value or 0 if empty.
+         */
+        uintptr_t handle() const {
+            return handle_.value_or(0);
+        }
+
+        /**
+         * @brief Releases ownership of the handle.
+         * @return The handle value or 0 if empty.
+         */
+        uintptr_t release() {
+            if (handle_) {
+                uintptr_t v = *handle_;
+                handle_     = std::nullopt;
+                return v;
+            }
+            return 0;
+        }
+
+        /**
+         * @brief Checks if a valid handle is stored.
+         * @return True if handle exists and is non-zero.
+         */
+        explicit operator bool() const {
+            return handle_.has_value() && *handle_ != 0;
+        }
+
+      private:
+        /**
+         * @brief Releases the current handle.
+         */
+        void clear() {
+            if (handle_) {
+                DeleteObject(*handle_);
+                handle_ = std::nullopt;
+            }
+        }
+
+        std::optional<uintptr_t> handle_;
+    };
+
+} // namespace ngosen

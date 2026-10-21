@@ -3,16 +3,21 @@
 Bộ gõ tiếng Việt cho Linux, giao diện viết lại hoàn toàn bằng **GTK 4 + libadwaita** — đúng kiểu cửa sổ
 Settings của GNOME/Ubuntu: sidebar, nhóm cài đặt, công tắc, tìm kiếm, sáng/tối theo hệ thống.
 
-Vietfox là bộ gõ tiếng Việt đóng gói trọn gói cho Linux: **giao diện GTK 4 + engine gõ đi kèm**.
-Engine là addon fcitx5 `ngosen` lấy từ [Ngó Sen](https://github.com/ngosen/ngosen),
-nên cài đặt, từ điển và quy tắc theo ứng dụng đang có vẫn dùng được. Cài bằng
-`./install.sh --with-engine` là gõ được ngay, không cần cài thêm gói `fcitx5-ngosen`.
-Phần giao diện cũ bằng Qt/PyQt không còn trong bản này.
+Vietfox là ứng dụng riêng gồm giao diện GTK 4 và addon Fcitx5 tên `vietfox`. Engine được dựng từ
+mã nguồn lõi Ngó Sen; giao diện Settings upstream không được đóng gói. Vietfox giữ lại đường dẫn
+cấu hình cũ để dùng tiếp kiểu gõ, từ điển, gõ tắt và quy tắc ứng dụng đã có.
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/settings-dark.png">
-  <img alt="Vietfox, trang Gõ chữ" src="docs/screenshots/settings-light.png" width="820">
-</picture>
+| Gõ chữ | Gõ tắt & Từ điển |
+| --- | --- |
+| ![Trang Gõ chữ](docs/screenshots/typing-dark.png) | ![Trang Gõ tắt và Từ điển](docs/screenshots/macros-dark.png) |
+
+| Keymap | Phím |
+| --- | --- |
+| ![Trang Keymap](docs/screenshots/keymap-dark.png) | ![Trang Phím](docs/screenshots/shortcuts-dark.png) |
+
+| Ứng dụng | |
+| --- | --- |
+| ![Trang Ứng dụng](docs/screenshots/apps-dark.png) | |
 
 ## Có gì trong cửa sổ
 
@@ -29,14 +34,6 @@ Phần giao diện cũ bằng Qt/PyQt không còn trong bản này.
 - Menu chính: sao lưu/khôi phục cấu hình ra JSON, đặt lại về mặc định.
 - Sáng/tối, cỡ chữ và màu nhấn theo hệ thống (libadwaita).
 - Kết nối fcitx5 qua D-Bus (`org.fcitx.Fcitx.Controller1`); không có fcitx5 thì lưu tạm và báo rõ.
-
-| Gõ tắt & Từ điển | Phím |
-| --- | --- |
-| ![Trang gõ tắt](docs/screenshots/macros-light.png) | ![Trang phím](docs/screenshots/keys-light.png) |
-
-| Tìm cài đặt | Giới thiệu |
-| --- | --- |
-| ![Tìm cài đặt](docs/screenshots/search-light.png) | ![Giới thiệu](docs/screenshots/about-light.png) |
 
 ## Chạy thử
 
@@ -58,31 +55,72 @@ hoặc `python3 -m vietfox`.
 
 ## Cài đặt
 
-### Cách 1 — một bộ cài duy nhất (khuyến nghị)
+### Cài nhanh trên Ubuntu 26.04 amd64
 
-```
-./install.sh --with-engine
-```
-
-Lệnh này cài **giao diện + engine Ngó Sen đi kèm** vào máy, thêm “Vietfox” vào
-nhóm gõ của fcitx5 rồi khởi động lại fcitx5. Sau đó **không cần** cài gói
-`fcitx5-ngosen` nữa.
-
-Installer cũng nối mục **Settings** trong menu Vietfox trên top bar tới giao diện Vietfox bằng
-launcher `/usr/bin/fcitx5-ngosen-settings`. Nếu đã có launcher cùng tên của Ngó Sen, installer
-giữ nguyên launcher đó để không ghi đè ứng dụng khác.
-
-Trên Ubuntu với GNOME 50, Vietfox cài extension `forward-keys@ngosen.github.io` để sửa lỗi GNOME làm rơi phím được bộ gõ chuyển tiếp, khiến Chrome không nhận chữ tiếng Việt. Sau khi cài, hãy đăng xuất rồi đăng nhập lại để GNOME nạp extension; sau đó chạy một lần:
+Chạy một lệnh trong Terminal:
 
 ```sh
-gnome-extensions enable forward-keys@ngosen.github.io
+curl -fsSL https://raw.githubusercontent.com/adfoxtheme/vietfox/main/install.sh | bash
 ```
 
-- Engine nằm trong `engine/` của repo (xem `engine/README.md`), giấy phép
-  GPL-3.0-or-later, nguồn https://github.com/ngosen/ngosen.
+Trình cài tải mã nguồn Vietfox, tự cài các gói Ubuntu cần thiết (Fcitx5, GTK 4 và libadwaita),
+cài engine, tạo cấu hình Fcitx5 nếu máy chưa có, rồi chọn Fcitx5 làm phương thức nhập cho lần đăng
+nhập tiếp theo. Trên GNOME 50, trình cài cũng cài và bật extension sửa lỗi Chrome nếu GNOME cho
+phép. Sau khi cài xong, đăng xuất rồi đăng nhập lại để áp dụng Fcitx5 và extension.
+
+Engine đóng gói hiện chỉ có cho Ubuntu 26.04 amd64; trình cài sẽ dừng trên nền khác thay vì cài
+nhầm binary. Cần kết nối Internet và mật khẩu quản trị để cài các gói Ubuntu.
+
+Nếu đã tải mã nguồn hoặc gói `.tar.gz` từ [Releases](https://github.com/adfoxtheme/vietfox/releases),
+chạy `./install.sh --with-engine` bên trong thư mục đó.
+
+Mục **Cài đặt Vietfox** trên top bar mở launcher Vietfox.
+
+Trên Ubuntu với GNOME 50, Vietfox cài extension tương thích bàn phím để sửa lỗi GNOME làm rơi
+phím được bộ gõ chuyển tiếp, khiến Chrome không nhận chữ tiếng Việt. Sau khi cài, hãy đăng xuất
+rồi đăng nhập lại để GNOME nạp extension; sau đó chạy một lần:
+
+```sh
+gnome-extensions enable forward-keys@adfoxtheme.github.io
+```
+
+- Source engine Vietfox nằm trong `engine/source/`; ghi công và giấy phép Ngó Sen nằm tại
+  `engine/source/UPSTREAM.txt`, `engine/source/LICENSE` và `engine/source/LICENSES/`.
 - Cần `fcitx5` chạy trên máy; engine được cài vào `/usr` nên sẽ hỏi mật khẩu sudo.
-- Nếu máy đã có gói `fcitx5-ngosen`, installer dùng engine hệ thống và bỏ qua
-  bản đi kèm. Dùng `--force-engine` nếu muốn ghi đè.
+- Nếu Ngó Sen được cài bằng gói Ubuntu, gỡ gói trước bằng `sudo apt remove fcitx5-ngosen` để tránh
+  installer đụng vào tệp do apt quản lý. Cấu hình Fcitx5 và từ điển cũ vẫn được Vietfox dùng lại.
+- Các tệp Ngó Sen còn lại do cài thủ công sẽ được dọn khi cài engine Vietfox để Fcitx5 không nạp
+  đồng thời hai addon.
+
+## Sửa lỗi không gõ được tiếng Việt trong Chrome
+
+Nếu Vietfox gõ được ở ứng dụng khác nhưng Chrome không nhận chữ, trước hết kiểm tra biểu tượng
+Fcitx5 trên top bar đang chọn **Vietfox**, không phải **US**. Trên GNOME 50.0–50.3 có lỗi chuyển
+phím khiến một số ứng dụng, gồm Chrome, bỏ qua phím do bộ gõ gửi lại. Bản cài Vietfox có extension
+để khắc phục lỗi này.
+
+Kiểm tra phiên bản GNOME Shell:
+
+```sh
+gnome-shell --version
+```
+
+Nếu là GNOME 50, bật extension Vietfox:
+
+```sh
+gnome-extensions enable forward-keys@adfoxtheme.github.io
+```
+
+Đăng xuất rồi đăng nhập lại, đóng mở lại Chrome và chọn **Vietfox** trên top bar. Có thể kiểm tra
+extension đã bật bằng lệnh:
+
+```sh
+gnome-extensions info forward-keys@adfoxtheme.github.io
+```
+
+Nếu máy báo không tìm thấy extension, chạy lại `./install.sh --with-engine` để cài các tệp của
+extension. Bản sửa này dành cho GNOME Shell 50; trên phiên GNOME khác, trước tiên xác nhận Fcitx5
+đang chạy và Vietfox được chọn làm bộ gõ.
 
 ### Cách 2 — chỉ cài giao diện
 
@@ -92,11 +130,8 @@ sudo ./install.sh --system  # cài vào /usr/local
 ./install.sh --uninstall    # gỡ bản cài cho người dùng
 ```
 
-Trường hợp này máy phải có sẵn engine Ngó Sen:
-
-```
-curl -fsSL https://raw.githubusercontent.com/ngosen/ngosen/main/install.sh | bash
-```
+Trường hợp này máy cần cài một engine Fcitx5 tương thích riêng. Engine Vietfox chưa được phát hành
+cho các phiên bản Ubuntu khác hoặc ARM64.
 
 Cài xong chạy `vietfox` hoặc mở **Vietfox** trong menu ứng dụng, chọn chế độ
 **Mặc định**, kiểu **Telex**, rồi dùng Ctrl+Space để bật bộ gõ.
@@ -111,9 +146,10 @@ Cài xong chạy `vietfox` hoặc mở **Vietfox** trong menu ứng dụng, ch�
 
 ## Cấu hình nằm ở đâu
 
-Vietfox dùng đúng addon và đường dẫn của Ngó Sen, không tạo bản sao:
+Trên Ubuntu 26.04 amd64, Vietfox đăng ký addon riêng. Các đường dẫn cấu hình và từ điển có tên
+cũ được giữ để dùng lại dữ liệu của người đang chuyển từ Ngó Sen:
 
-- addon fcitx5: `fcitx://config/addon/ngosen`
+- addon fcitx5: `fcitx://config/addon/vietfox`
 - gõ tắt: `~/.config/fcitx5/conf/ngosen-macro-table.conf`
 - quy tắc app: `~/.config/fcitx5/conf/ngosen-app-rules.conf`
 - từ điển riêng: `~/.local/share/fcitx5/ngosen/vietnamese.cm.dict`

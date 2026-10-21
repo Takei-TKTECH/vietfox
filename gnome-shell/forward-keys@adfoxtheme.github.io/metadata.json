@@ -1,0 +1,7 @@
+{
+  "uuid": "forward-keys@adfoxtheme.github.io",
+  "name": "Vietfox - Sửa lỗi chuyển phím",
+  "description": "Delivers keys that an input method forwards to the app. GNOME 50.0 to 50.3 drop them (mutter#4853), which breaks Vietnamese typing.",
+  "shell-version": ["50"],
+  "url": "https://github.com/adfoxtheme/vietfox"
+}

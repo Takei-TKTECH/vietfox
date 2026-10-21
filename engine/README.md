@@ -1,52 +1,40 @@
-# Engine đi kèm Vietfox
+# Engine Vietfox
 
-Thư mục này chứa engine gõ lấy từ dự án **Ngó Sen** để bộ cài Vietfox hoạt động
-độc lập, không cần cài thêm gói `fcitx5-ngosen` của hệ thống.
+Vietfox là addon Fcitx5 riêng, được dựng từ mã nguồn engine Ngó Sen. Giao diện cài đặt,
+launcher, tên addon và input method do Vietfox quản lý; source GUI Ngó Sen không được đóng gói.
+Phần lõi xử lý tiếng Việt được giữ để tương thích hành vi gõ.
 
-| Thông tin | Giá trị |
-| --- | --- |
-| Nguồn | https://github.com/ngosen/ngosen |
-| Phiên bản | 1.5.2-1 |
-| Giấy phép | GPL-3.0-or-later (xem `COPYRIGHT`) |
-| Hệ điều hành | Ubuntu 22.04, 24.04, 26.04 |
-| Kiến trúc | amd64 (x86_64), arm64 (aarch64) |
-| Yêu cầu | fcitx5 ≥ 5.1.19, libc ≥ 2.39 |
+## Tương thích
 
-## File và vị trí cài
+- Addon Fcitx5: `vietfox`, thư viện `libvietfox.so`.
+- Addon di trú cấu hình: `vietfoxmigrate`, thư viện `libvietfoxmigrate.so`.
+- Tên hiển thị và input method: `Vietfox`.
+- Cài đặt cũ trong `~/.config/fcitx5/conf/ngosen.conf`, gõ tắt, quy tắc ứng dụng và từ điển
+  Ngó Sen được giữ nguyên để Vietfox dùng tiếp.
+- Source upstream: https://github.com/ngosen/ngosen, commit `7cb39e4`.
+- Lõi ghép dấu Go: submodule `bamboo/bamboo-core` tại commit
+  `e896341c568584d9cd8db0836d7ecb8d6ff79d1b`.
+- Giấy phép: GPL-3.0-or-later; giấy phép phụ nằm trong `source/LICENSES/`.
 
-| Trong repo | Cài vào |
-| --- | --- |
-| `lib/libngosen.so` | `/usr/lib/<triplet>/fcitx5/` |
-| `lib/libngosenmigrate.so` | `/usr/lib/<triplet>/fcitx5/` |
-| `share/fcitx5/addon/ngosen.conf` | `/usr/share/fcitx5/addon/` |
-| `share/fcitx5/addon/ngosenmigrate.conf` | `/usr/share/fcitx5/addon/` |
-| `share/fcitx5/inputmethod/ngosen.conf` | `/usr/share/fcitx5/inputmethod/` |
-| `share/fcitx5/ngosen/vietnamese.cm.dict` | `/usr/share/fcitx5/ngosen/` |
+Thư mục `source/` chỉ chứa engine và dữ liệu runtime cần build. Giao diện Settings Ngó Sen,
+desktop entry, metadata và GNOME extension upstream không được build từ đây.
 
-Engine mở Settings từ menu top bar bằng `/usr/bin/fcitx5-ngosen-settings`. `install.sh` cài launcher
-tương thích trỏ tới giao diện Vietfox nếu đường dẫn này chưa có chương trình khác.
+## Build trên Ubuntu
 
-`patches/vietfox-status-menu.patch` đưa các thao tác nhanh trở lại menu (bảng mã, chính tả, gõ tắt, khôi phục từ, từ điển, nhật ký) và Việt hoá nhãn; mục mở giao diện là **Cài đặt Vietfox**. Trạng thái bật/tắt hiển thị bằng dấu ✓/✖, theo menu native của Fcitx.
-`patches/vietfox-punctuation-fallback.patch` giữ nguyên chữ tiếng Việt khi người dùng gõ dấu câu
-cuối từ. Từ `xêm` cũng được thêm vào từ điển để tránh khôi phục nhầm về phím Telex.
-`install.sh --with-engine` chọn thư viện theo `VERSION_CODENAME` và kiến trúc gói Ubuntu.
-Các engine jammy/noble và resolute arm64 lấy từ gói Ngó Sen 1.5.2-1 tương ứng;
-resolute amd64 được rebuild từ cùng tag với patch menu Vietfox. Danh sách và nguồn nằm
-tại `variants/README.md`. Catalog tiếng Việt nằm tại `share/locale/vi/LC_MESSAGES/`.
+Máy cần CMake, trình biên dịch C/C++, Go, gettext, Fcitx5 headers, ECM, librsvg và các gói
+phát triển của Fcitx5. Từ gốc repo:
 
-Icon Settings riêng nằm tại
-`data/io.github.vietfox.Settings.svg`, được cài vào hicolor để hiển thị trắng trên nền tối.
-Các biểu tượng thao tác nhanh cùng nét trắng được lưu trong `data/menu-icons/` và cài vào
-ngữ cảnh `actions` của hicolor để Fcitx tìm thấy đúng icon.
+```sh
+cmake -S engine/source -B build/engine -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=/usr/lib
+cmake --build build/engine --parallel
+DESTDIR=/tmp/vietfox-engine-stage cmake --install build/engine
+```
 
-Tên addon vẫn là `ngosen` để dùng chung định dạng cấu hình, từ điển và gõ tắt
-với Ngó Sen. Giao diện Vietfox nhận addon này qua `ADDON_NAMES = ("ngosen", "vietfox")`.
+Build tạo `libvietfox.so`, `libvietfoxmigrate.so`, addon descriptor và input method `vietfox`.
+Script `./engine/build-ubuntu.sh` build và cập nhật artifact Vietfox cho Ubuntu 26.04 amd64.
+Không chạy lệnh install vào `/usr` trong bước build. Binary theo Ubuntu/kiến trúc nằm trong
+`variants/ubuntu/<codename>/<architecture>/`.
 
-## Lưu ý khi bảo trì
-
-- `.so` phụ thuộc ABI của fcitx5. Ubuntu ngoài các bản đã liệt kê chưa được đóng gói.
-- Chỉ engine resolute amd64 hiện đã được build với menu Vietfox và nhãn tiếng Việt; các gói Ubuntu còn lại vẫn là binary upstream, cần rebuild từ source tương ứng để có menu giống hệt.
-- Không sửa trực tiếp file trong `engine/`; luôn chép từ gói/bản phát hành gốc
-  và cập nhật bảng trên.
-- Nếu máy đã cài `fcitx5-ngosen`, `install.sh` mặc định dùng engine hệ thống
-  thay vì ghi đè. Dùng `--force-engine` để buộc ghi đè.
+Tên `ngosen` còn trong namespace nội bộ và các đường dẫn cấu hình tương thích. Không đổi các
+đường dẫn đó nếu chưa có bước chuyển cấu hình và kiểm tra dữ liệu cũ.
