@@ -134,7 +134,11 @@ fi
 if [[ $UNINSTALL -eq 0 && "${ID:-}" == "ubuntu" ]] && command -v apt-get >/dev/null 2>&1; then
     APT_PACKAGES=(python3-gi gir1.2-gtk-4.0 gir1.2-adw-1)
     if [[ $WITH_ENGINE -eq 1 ]]; then
-        APT_PACKAGES+=(fcitx5 im-config)
+        # fcitx5 only recommends its app frontends on some Ubuntu setups. Name
+        # them explicitly so reinstallations and systems with recommends off
+        # still get GTK and Qt input-method support (including Chrome/Chromium).
+        APT_PACKAGES+=(fcitx5 im-config fcitx5-frontend-gtk3 fcitx5-frontend-gtk4
+            fcitx5-frontend-qt5 fcitx5-frontend-qt6)
     fi
     MISSING_PACKAGES=()
     for package in "${APT_PACKAGES[@]}"; do
@@ -153,14 +157,97 @@ FORWARD_KEYS_DIR="$USER_HOME/.local/share/gnome-shell/extensions/$FORWARD_KEYS_U
 LEGACY_FORWARD_KEYS_UUID="forward-keys@ngosen.github.io"
 LEGACY_FORWARD_KEYS_DIR="$USER_HOME/.local/share/gnome-shell/extensions/$LEGACY_FORWARD_KEYS_UUID"
 
+set_shell_extension_enabled() {
+    local uuid="$1" action="$2" current updated
+    command -v gsettings >/dev/null 2>&1 || return 2
+    current="$(gsettings get org.gnome.shell enabled-extensions 2>/dev/null)" || return 2
+    updated="$(python3 - "$current" "$uuid" "$action" <<'PY'
+import ast
+import sys
+
+raw, uuid, action = sys.argv[1:]
+if raw.startswith("@as "):
+    raw = raw[4:]
+try:
+    extensions = ast.literal_eval(raw)
+except (SyntaxError, ValueError):
+    raise SystemExit(2)
+if not isinstance(extensions, list) or not all(isinstance(item, str) for item in extensions):
+    raise SystemExit(2)
+if action == "enable" and uuid not in extensions:
+    extensions.append(uuid)
+elif action == "disable":
+    extensions = [item for item in extensions if item != uuid]
+print("[" + ", ".join(repr(item) for item in extensions) + "]")
+PY
+    )" || return 2
+    [[ "$updated" != "$current" ]] || return 0
+    gsettings set org.gnome.shell enabled-extensions "$updated" >/dev/null 2>&1 || return 2
+    current="$(gsettings get org.gnome.shell enabled-extensions 2>/dev/null)" || return 2
+    if [[ "$action" == enable ]] && grep -Fq "'$uuid'" <<< "$current"; then
+        return 0
+    elif [[ "$action" == disable ]] && ! grep -Fq "'$uuid'" <<< "$current"; then
+        return 0
+    fi
+    return 2
+}
+
+configure_gnome_input_support() {
+    [[ "${XDG_CURRENT_DESKTOP:-}" == *GNOME* ]] || return 0
+
+    local config_dir="$USER_HOME/.config"
+    local env_dir="$config_dir/environment.d"
+    local env_file="$env_dir/90-vietfox.conf"
+    local autostart_dir="$config_dir/autostart"
+    local autostart_file="$autostart_dir/org.fcitx.Fcitx5.desktop"
+
+    if [[ ! -f "$env_file" ]] && ! grep -qs '^GTK_IM_MODULE=' "$env_dir"/*.conf 2>/dev/null; then
+        install -d "$env_dir"
+        cat > "$env_file" <<'EOF'
+# Managed by Vietfox installer
+GTK_IM_MODULE=fcitx
+QT_IM_MODULE=fcitx
+XMODIFIERS=@im=fcitx
+SDL_IM_MODULE=fcitx
+EOF
+        echo "Đã cấu hình môi trường GNOME để ứng dụng dùng Fcitx5. Đăng xuất/đăng nhập để áp dụng."
+    fi
+
+    if [[ ! -e /etc/xdg/autostart/org.fcitx.Fcitx5.desktop &&
+          ! -e "$autostart_file" &&
+          -f /usr/share/applications/org.fcitx.Fcitx5.desktop ]]; then
+        install -d "$autostart_dir"
+        cp /usr/share/applications/org.fcitx.Fcitx5.desktop "$autostart_file"
+        echo "Đã thêm Fcitx5 tự khởi chạy khi đăng nhập GNOME."
+    fi
+}
+
 if [[ $UNINSTALL -eq 1 ]]; then
     if [[ -f "$FORWARD_KEYS_DIR/.vietfox-managed" ]]; then
-        gnome-extensions disable "$FORWARD_KEYS_UUID" >/dev/null 2>&1 || true
+        set_shell_extension_enabled "$FORWARD_KEYS_UUID" disable ||
+            gnome-extensions disable "$FORWARD_KEYS_UUID" >/dev/null 2>&1 || true
         rm -rf "$FORWARD_KEYS_DIR"
     fi
     if [[ -f "$LEGACY_FORWARD_KEYS_DIR/.vietfox-managed" ]]; then
-        gnome-extensions disable "$LEGACY_FORWARD_KEYS_UUID" >/dev/null 2>&1 || true
+        set_shell_extension_enabled "$LEGACY_FORWARD_KEYS_UUID" disable ||
+            gnome-extensions disable "$LEGACY_FORWARD_KEYS_UUID" >/dev/null 2>&1 || true
         rm -rf "$LEGACY_FORWARD_KEYS_DIR"
+    fi
+    ENV_FILE="$USER_HOME/.config/environment.d/90-vietfox.conf"
+    if [[ -f "$ENV_FILE" ]] && cmp -s "$ENV_FILE" <(cat <<'EOF'
+# Managed by Vietfox installer
+GTK_IM_MODULE=fcitx
+QT_IM_MODULE=fcitx
+XMODIFIERS=@im=fcitx
+SDL_IM_MODULE=fcitx
+EOF
+    ); then
+        rm -f "$ENV_FILE"
+    fi
+    USER_AUTOSTART="$USER_HOME/.config/autostart/org.fcitx.Fcitx5.desktop"
+    if [[ -f "$USER_AUTOSTART" && -f /usr/share/applications/org.fcitx.Fcitx5.desktop ]] &&
+       cmp -s /usr/share/applications/org.fcitx.Fcitx5.desktop "$USER_AUTOSTART"; then
+        rm -f "$USER_AUTOSTART"
     fi
     SETTINGS_LAUNCHER="/usr/bin/fcitx5-ngosen-settings"
     $SUDO rm -f /usr/share/icons/hicolor/scalable/apps/io.github.vietfox.Settings.svg
@@ -233,12 +320,17 @@ cp "$SRC_DIR/data/io.github.vietfox.Settings.svg" "$SETTINGS_ICON"
 sed "s|^Exec=.*|Exec=$LAUNCHER|" \
     "$SRC_DIR/data/io.github.vietfox.Vietfox.desktop" > "$DESKTOP"
 
-# GNOME 50.0–50.3 drops forwarded input-method keys in some applications,
-# including Chrome. Vietfox ships a GNOME Shell compatibility extension.
-if command -v gnome-shell >/dev/null 2>&1 &&
-   gnome-shell --version 2>/dev/null | grep -Eq 'GNOME Shell 50\.'; then
+# Configure the GNOME session like the upstream Fcitx5 installer does, then
+# register the bundled extension in GNOME's enabled-extensions setting. This
+# setting takes effect at the next GNOME login.
+if [[ $WITH_ENGINE -eq 1 ]] && command -v gnome-shell >/dev/null 2>&1; then
+    configure_gnome_input_support
+    GNOME_SHELL_VERSION="$(gnome-shell --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+' | head -n 1 || true)"
+    case "$GNOME_SHELL_VERSION" in
+      50.0|50.1|50.2|50.3)
     if [[ -f "$LEGACY_FORWARD_KEYS_DIR/.vietfox-managed" ]]; then
-        gnome-extensions disable "$LEGACY_FORWARD_KEYS_UUID" >/dev/null 2>&1 || true
+        set_shell_extension_enabled "$LEGACY_FORWARD_KEYS_UUID" disable ||
+            gnome-extensions disable "$LEGACY_FORWARD_KEYS_UUID" >/dev/null 2>&1 || true
         rm -rf "$LEGACY_FORWARD_KEYS_DIR"
     fi
     install -d "$FORWARD_KEYS_DIR"
@@ -247,12 +339,14 @@ if command -v gnome-shell >/dev/null 2>&1 &&
     install -m 644 "$SRC_DIR/gnome-shell/$FORWARD_KEYS_UUID/metadata.json" \
         "$FORWARD_KEYS_DIR/metadata.json"
     touch "$FORWARD_KEYS_DIR/.vietfox-managed"
-    if command -v gnome-extensions >/dev/null 2>&1 &&
-       gnome-extensions enable "$FORWARD_KEYS_UUID" >/dev/null 2>&1; then
-        echo "Đã cài và bật extension sửa lỗi gõ Chrome cho GNOME 50. Hãy đăng xuất/đăng nhập để áp dụng."
+    if set_shell_extension_enabled "$FORWARD_KEYS_UUID" enable; then
+        echo "Đã bật extension sửa lỗi gõ Chrome cho GNOME $GNOME_SHELL_VERSION. Đăng xuất/đăng nhập để GNOME nạp extension."
     else
-        echo "Đã cài extension sửa lỗi gõ Chrome. Sau khi đăng xuất/đăng nhập, chạy: gnome-extensions enable $FORWARD_KEYS_UUID"
+        echo "Đã cài extension sửa lỗi gõ Chrome. Sau khi đăng nhập lại, chạy: gnome-extensions enable $FORWARD_KEYS_UUID"
     fi
+        ;;
+      *) ;;
+    esac
 fi
 
 cat > "$LAUNCHER" <<EOF
@@ -477,15 +571,30 @@ if [[ -f "/usr/share/fcitx5/inputmethod/vietfox.conf" ]]; then
     INPUT_METHOD_ID="vietfox"
 fi
 if command -v fcitx5 >/dev/null && [[ -f "/usr/share/fcitx5/inputmethod/$INPUT_METHOD_ID.conf" ]]; then
-    BEFORE_HASH="$(sha256sum "$PROFILE" 2>/dev/null | cut -d' ' -f1 || true)"
-    enable_input_method "$INPUT_METHOD_ID"
-    AFTER_HASH="$(sha256sum "$PROFILE" | cut -d' ' -f1)"
-    if [[ "$BEFORE_HASH" != "$AFTER_HASH" ]] && pgrep -x fcitx5 >/dev/null; then
+    FCITX5_WAS_RUNNING=0
+    if pgrep -x fcitx5 >/dev/null 2>&1; then
+        FCITX5_WAS_RUNNING=1
         fcitx5-remote -e >/dev/null 2>&1 || true
-        sleep 1
-        if [[ -n "${WAYLAND_DISPLAY:-}${DISPLAY:-}" ]]; then
-            setsid fcitx5 -d >/dev/null 2>&1 || true
-        fi
+        for _ in {1..10}; do
+            pgrep -x fcitx5 >/dev/null 2>&1 || break
+            sleep 0.5
+        done
+    fi
+    enable_input_method "$INPUT_METHOD_ID"
+    FCITX5_CONFIG="$USER_HOME/.config/fcitx5/config"
+    if ! grep -qs '^\[Hotkey/TriggerKeys\]$' "$FCITX5_CONFIG"; then
+        install -d "$(dirname "$FCITX5_CONFIG")"
+        cat >> "$FCITX5_CONFIG" <<'EOF'
+
+[Hotkey/TriggerKeys]
+0=Control+Shift_L
+1=Control+Shift_R
+2=Shift+Control_L
+3=Shift+Control_R
+EOF
+    fi
+    if [[ $FCITX5_WAS_RUNNING -eq 1 ]]; then
+        fcitx5 -d >/dev/null 2>&1 || true
     fi
 fi
 

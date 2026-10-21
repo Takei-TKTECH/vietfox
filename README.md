@@ -63,10 +63,11 @@ Chạy một lệnh trong Terminal:
 curl -fsSL https://raw.githubusercontent.com/adfoxtheme/vietfox/main/install.sh | bash
 ```
 
-Trình cài tải mã nguồn Vietfox, tự cài các gói Ubuntu cần thiết (Fcitx5, GTK 4 và libadwaita),
-cài engine, tạo cấu hình Fcitx5 nếu máy chưa có, rồi chọn Fcitx5 làm phương thức nhập cho lần đăng
-nhập tiếp theo. Trên GNOME 50, trình cài cũng cài và bật extension sửa lỗi Chrome nếu GNOME cho
-phép. Sau khi cài xong, đăng xuất rồi đăng nhập lại để áp dụng Fcitx5 và extension.
+Trình cài tải mã nguồn Vietfox và tự cài các gói cần thiết: Fcitx5, `im-config`, frontend GTK 3/4
+và Qt 5/6, GTK 4, cùng libadwaita. Sau đó nó cài engine, chọn Fcitx5 làm phương thức nhập, cấu hình
+môi trường và tự khởi chạy Fcitx5 trong GNOME, rồi thêm Vietfox vào cấu hình Fcitx5. Trên GNOME
+50.0–50.3, trình cài cũng cài và đăng ký extension sửa lỗi Chrome để GNOME nạp ở lần đăng nhập
+tiếp theo. Đăng xuất rồi đăng nhập lại sau khi cài để áp dụng các thay đổi phiên làm việc.
 
 Engine đóng gói hiện chỉ có cho Ubuntu 26.04 amd64; trình cài sẽ dừng trên nền khác thay vì cài
 nhầm binary. Cần kết nối Internet và mật khẩu quản trị để cài các gói Ubuntu.
@@ -76,13 +77,9 @@ chạy `./install.sh --with-engine` bên trong thư mục đó.
 
 Mục **Cài đặt Vietfox** trên top bar mở launcher Vietfox.
 
-Trên Ubuntu với GNOME 50, Vietfox cài extension tương thích bàn phím để sửa lỗi GNOME làm rơi
-phím được bộ gõ chuyển tiếp, khiến Chrome không nhận chữ tiếng Việt. Sau khi cài, hãy đăng xuất
-rồi đăng nhập lại để GNOME nạp extension; sau đó chạy một lần:
-
-```sh
-gnome-extensions enable forward-keys@adfoxtheme.github.io
-```
+Trên Ubuntu với GNOME 50.0–50.3, Vietfox đăng ký extension tương thích bàn phím trong danh sách
+extension được bật của GNOME. Đăng xuất rồi đăng nhập lại để GNOME nạp extension. Không cần bật
+thủ công; nếu GNOME chưa nạp extension, xem phần xử lý lỗi Chrome bên dưới.
 
 - Source engine Vietfox nằm trong `engine/source/`; ghi công và giấy phép Ngó Sen nằm tại
   `engine/source/UPSTREAM.txt`, `engine/source/LICENSE` và `engine/source/LICENSES/`.
@@ -105,18 +102,26 @@ Kiểm tra phiên bản GNOME Shell:
 gnome-shell --version
 ```
 
-Nếu là GNOME 50, bật extension Vietfox:
+Nếu là GNOME 50.0–50.3, kiểm tra trạng thái extension:
+
+```sh
+gnome-extensions info forward-keys@adfoxtheme.github.io
+```
+
+Nếu extension chưa bật, đăng ký/bật thủ công rồi đăng xuất và đăng nhập lại:
 
 ```sh
 gnome-extensions enable forward-keys@adfoxtheme.github.io
 ```
 
-Đăng xuất rồi đăng nhập lại, đóng mở lại Chrome và chọn **Vietfox** trên top bar. Có thể kiểm tra
-extension đã bật bằng lệnh:
+Sau đó đóng mở lại Chrome và chọn **Vietfox** trên top bar. Nếu gõ không hoạt động trong Chrome
+nhưng hoạt động ở ứng dụng khác, xác nhận frontend GTK 3 đã cài:
 
 ```sh
-gnome-extensions info forward-keys@adfoxtheme.github.io
+dpkg -s fcitx5-frontend-gtk3
 ```
+
+Trình cài Vietfox sẽ tự cài frontend này cùng các frontend GTK/Qt còn lại khi chạy `--with-engine`.
 
 Nếu máy báo không tìm thấy extension, chạy lại `./install.sh --with-engine` để cài các tệp của
 extension. Bản sửa này dành cho GNOME Shell 50; trên phiên GNOME khác, trước tiên xác nhận Fcitx5
