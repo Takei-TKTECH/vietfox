@@ -3,9 +3,6 @@
 
 from __future__ import annotations
 
-import shutil
-import subprocess
-
 import gi
 
 gi.require_version("Gtk", "4.0")
@@ -98,22 +95,6 @@ class ShortcutsPage(Page):
             placeholder="Sen,Preedit,Emoji,Off,Default",
         )
         self.add(advanced, order, "thu tu che do mode order")
-        self.add(
-            advanced,
-            self.switch(
-                "EnableCustomKeymap",
-                "Bật keymap tuỳ chỉnh",
-                "Keymap được sửa trong phần cài đặt bàn phím của fcitx5.",
-                False,
-                keywords="keymap tuy chinh ban phim",
-            ),
-        )
-        open_fcitx = Adw.ButtonRow(title="Mở cài đặt bàn phím fcitx5")
-        open_fcitx.set_start_icon_name("preferences-system-symbolic")
-        open_fcitx.connect("activated", lambda _row: self._open_fcitx())
-        advanced.add(open_fcitx)
-        self.track(open_fcitx, "mo cai dat ban phim fcitx5 keymap")
-
     # ------------------------------------------------------------------ rows
     def _mode_row(self, ident: str, label: str, shortcut: str) -> Adw.ActionRow:
         show_key = f"ShowMode{ident}"
@@ -210,13 +191,3 @@ class ShortcutsPage(Page):
         # Rebuild the page so both controls show the restored values.
         self.window.reload_pages()
         self.window.show_undone("menu chế độ")
-
-    def _open_fcitx(self) -> None:
-        program = shutil.which("fcitx5-configtool")
-        if not program:
-            self.window.show_error("Chưa cài fcitx5-configtool trên máy này.")
-            return
-        try:
-            subprocess.Popen([program])
-        except OSError as error:
-            self.window.show_error(str(error))

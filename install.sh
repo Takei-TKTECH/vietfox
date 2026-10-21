@@ -53,6 +53,7 @@ APPS_DIR="$PREFIX/share/applications"
 ICON_DIR="$PREFIX/share/icons/hicolor/scalable/apps"
 DESKTOP="$APPS_DIR/io.github.vietfox.Vietfox.desktop"
 ICON="$ICON_DIR/io.github.vietfox.Vietfox.svg"
+SETTINGS_ICON="$ICON_DIR/io.github.vietfox.Settings.svg"
 LAUNCHER="$BIN_DIR/vietfox"
 DOC_DIR="$PREFIX/share/doc/vietfox"
 
@@ -61,9 +62,29 @@ if [[ "$(id -u)" -ne 0 ]]; then
     SUDO="sudo"
 fi
 
+USER_HOME="$HOME"
+if [[ -n "${SUDO_USER:-}" ]]; then
+    USER_HOME="$(getent passwd "$SUDO_USER" | cut -d: -f6)"
+fi
+FORWARD_KEYS_UUID="forward-keys@ngosen.github.io"
+FORWARD_KEYS_DIR="$USER_HOME/.local/share/gnome-shell/extensions/$FORWARD_KEYS_UUID"
+
 if [[ $UNINSTALL -eq 1 ]]; then
+    if [[ -f "$FORWARD_KEYS_DIR/.vietfox-managed" ]]; then
+        gnome-extensions disable "$FORWARD_KEYS_UUID" >/dev/null 2>&1 || true
+        rm -rf "$FORWARD_KEYS_DIR"
+    fi
+    SETTINGS_LAUNCHER="/usr/bin/fcitx5-ngosen-settings"
+    $SUDO rm -f /usr/share/icons/hicolor/scalable/apps/io.github.vietfox.Settings.svg
+    $SUDO rm -f /usr/share/icons/hicolor/scalable/apps/io.github.vietfox.Menu.*.svg
+    $SUDO rm -f /usr/share/icons/hicolor/scalable/actions/vietfox-*.svg
+    $SUDO gtk-update-icon-cache -f /usr/share/icons/hicolor >/dev/null 2>&1 || true
+    if [[ -f "$SETTINGS_LAUNCHER" ]] && grep -q '^# Managed by Vietfox installer$' "$SETTINGS_LAUNCHER"; then
+        $SUDO rm -f "$SETTINGS_LAUNCHER"
+        echo "Đã gỡ launcher Settings của Vietfox."
+    fi
     rm -rf "$DATA_DIR"
-    rm -f "$LAUNCHER" "$DESKTOP" "$ICON"
+    rm -f "$LAUNCHER" "$DESKTOP" "$ICON" "$SETTINGS_ICON"
     command -v update-desktop-database >/dev/null && update-desktop-database "$APPS_DIR" || true
     if [[ $WITH_ENGINE -eq 1 ]]; then
         if dpkg -s fcitx5-ngosen >/dev/null 2>&1; then
@@ -80,7 +101,8 @@ if [[ $UNINSTALL -eq 1 ]]; then
                     /usr/share/fcitx5/addon/ngosen.conf \
                     /usr/share/fcitx5/addon/ngosenmigrate.conf \
                     /usr/share/fcitx5/inputmethod/ngosen.conf \
-                    /usr/share/fcitx5/ngosen/vietnamese.cm.dict
+                    /usr/share/fcitx5/ngosen/vietnamese.cm.dict \
+                    /usr/share/locale/vi/LC_MESSAGES/fcitx5-ngosen.mo
                 echo "Đã gỡ engine đi kèm."
             fi
         fi
@@ -116,8 +138,22 @@ cp -r "$SRC_DIR/vietfox" "$DATA_DIR/vietfox"
 cp -r "$SRC_DIR/data" "$DATA_DIR/data"
 find "$DATA_DIR" -name '__pycache__' -type d -prune -exec rm -rf {} +
 cp "$SRC_DIR/data/io.github.vietfox.Vietfox.svg" "$ICON"
+cp "$SRC_DIR/data/io.github.vietfox.Settings.svg" "$SETTINGS_ICON"
 sed "s|^Exec=.*|Exec=$LAUNCHER|" \
     "$SRC_DIR/data/io.github.vietfox.Vietfox.desktop" > "$DESKTOP"
+
+# GNOME 50.0–50.3 drops forwarded input-method keys in some applications,
+# including Chrome. Ngó Sen ships this GNOME Shell compatibility extension.
+if command -v gnome-shell >/dev/null 2>&1 &&
+   gnome-shell --version 2>/dev/null | grep -Eq 'GNOME Shell 50\.'; then
+    install -d "$FORWARD_KEYS_DIR"
+    install -m 644 "$SRC_DIR/gnome-shell/$FORWARD_KEYS_UUID/extension.js" \
+        "$FORWARD_KEYS_DIR/extension.js"
+    install -m 644 "$SRC_DIR/gnome-shell/$FORWARD_KEYS_UUID/metadata.json" \
+        "$FORWARD_KEYS_DIR/metadata.json"
+    touch "$FORWARD_KEYS_DIR/.vietfox-managed"
+    echo "Đã cài phần sửa lỗi gõ cho GNOME 50. Hãy đăng xuất/đăng nhập, rồi chạy: gnome-extensions enable $FORWARD_KEYS_UUID"
+fi
 
 cat > "$LAUNCHER" <<EOF
 #!/bin/sh
@@ -129,42 +165,103 @@ cp "$SRC_DIR/LICENSE" "$DOC_DIR/LICENSE"
 [[ -f "$SRC_DIR/engine/COPYRIGHT" ]] && cp "$SRC_DIR/engine/COPYRIGHT" "$DOC_DIR/engine-COPYRIGHT"
 
 # ------------------------------------------------------------------- engine
+install_settings_launcher() {
+    local settings_launcher="/usr/bin/fcitx5-ngosen-settings"
+    $SUDO install -D -m 644 "$SRC_DIR/data/io.github.vietfox.Settings.svg" \
+        /usr/share/icons/hicolor/scalable/apps/io.github.vietfox.Settings.svg
+    # Fcitx action icons are looked up in the icon theme's Actions context.
+    # The previous Apps-context location caused GTK to show a missing-icon glyph.
+    $SUDO rm -f /usr/share/icons/hicolor/scalable/apps/io.github.vietfox.Menu.*.svg
+    local menu_icon
+    for menu_icon in "$SRC_DIR"/data/menu-icons/vietfox-*.svg; do
+        $SUDO install -D -m 644 "$menu_icon" \
+            "/usr/share/icons/hicolor/scalable/actions/$(basename "$menu_icon")"
+    done
+    $SUDO gtk-update-icon-cache -f /usr/share/icons/hicolor >/dev/null 2>&1 || true
+    if [[ -e "$settings_launcher" ]] && ! grep -q '^# Managed by Vietfox installer$' "$settings_launcher"; then
+        echo "Giữ nguyên $settings_launcher hiện có; không ghi đè Settings của Ngó Sen."
+        return 0
+    fi
+
+    local quoted_launcher launcher_script
+    printf -v quoted_launcher '%q' "$LAUNCHER"
+    launcher_script=$(mktemp)
+    cat > "$launcher_script" <<EOF
+#!/bin/sh
+# Managed by Vietfox installer
+user_launcher="\${HOME}/.local/bin/vietfox"
+if [ -x "\$user_launcher" ]; then
+    exec "\$user_launcher" "\$@"
+fi
+exec $quoted_launcher "\$@"
+EOF
+    $SUDO install -m 755 "$launcher_script" "$settings_launcher"
+    rm -f "$launcher_script"
+    echo "Đã nối Settings trên top bar với Vietfox."
+}
+
 install_engine() {
-    local arch_triplet libdir sharedir
-    case "$(uname -m)" in
-        x86_64) arch_triplet="x86_64-linux-gnu" ;;
-        aarch64) arch_triplet="aarch64-linux-gnu" ;;
+    local arch_triplet libdir sharedir distro_id codename package_arch variant_dir
+    . /etc/os-release
+    distro_id="${ID:-}"
+    codename="${VERSION_CODENAME:-}"
+    if [[ "$distro_id" != "ubuntu" ]]; then
+        echo "Engine đóng gói hiện chỉ hỗ trợ Ubuntu." >&2
+        return 1
+    fi
+    if ! command -v dpkg >/dev/null; then
+        echo "Không xác định được kiến trúc gói Ubuntu." >&2
+        return 1
+    fi
+    package_arch="$(dpkg --print-architecture)"
+    case "$package_arch" in
+        amd64) arch_triplet="x86_64-linux-gnu" ;;
+        arm64) arch_triplet="aarch64-linux-gnu" ;;
         *)
-            echo "Kiến trúc $(uname -m) chưa có engine đóng gói sẵn." >&2
+            echo "Engine Ubuntu chưa được đóng gói cho kiến trúc $package_arch." >&2
             return 1
             ;;
     esac
+    variant_dir="$SRC_DIR/engine/variants/ubuntu/$codename/$package_arch"
+    if [[ ! -f "$variant_dir/libngosen.so" || ! -f "$variant_dir/libngosenmigrate.so" ]]; then
+        echo "Chưa có engine Vietfox cho Ubuntu $codename ($package_arch)." >&2
+        return 1
+    fi
     libdir="/usr/lib/$arch_triplet/fcitx5"
     sharedir="/usr/share/fcitx5"
 
-    echo "Cài engine vào $libdir và $sharedir (cần quyền quản trị)…"
+    echo "Cài engine Vietfox cho Ubuntu $codename ($package_arch) vào $libdir…"
     $SUDO install -d "$libdir" "$sharedir/addon" "$sharedir/inputmethod" "$sharedir/ngosen"
-    $SUDO install -m 644 "$SRC_DIR/engine/lib/libngosen.so" \
-        "$SRC_DIR/engine/lib/libngosenmigrate.so" "$libdir/"
+    $SUDO install -m 644 "$variant_dir/libngosen.so" \
+        "$variant_dir/libngosenmigrate.so" "$libdir/"
     $SUDO install -m 644 "$SRC_DIR/engine/share/fcitx5/addon/ngosen.conf" \
         "$SRC_DIR/engine/share/fcitx5/addon/ngosenmigrate.conf" "$sharedir/addon/"
     $SUDO install -m 644 "$SRC_DIR/engine/share/fcitx5/inputmethod/ngosen.conf" "$sharedir/inputmethod/"
     $SUDO install -m 644 "$SRC_DIR/engine/share/fcitx5/ngosen/vietnamese.cm.dict" "$sharedir/ngosen/"
+    $SUDO install -D -m 644 "$SRC_DIR/engine/share/locale/vi/LC_MESSAGES/fcitx5-ngosen.mo" \
+        /usr/share/locale/vi/LC_MESSAGES/fcitx5-ngosen.mo
 
     if ldd "$libdir/libngosen.so" 2>/dev/null | grep -q "not found"; then
         echo "Cảnh báo: engine thiếu thư viện:" >&2
         ldd "$libdir/libngosen.so" | grep "not found" >&2
     fi
+
+    # The bundled engine starts a fixed path for its top-bar Settings action.
+    # Preserve any upstream launcher already installed at that path.
+    install_settings_launcher
 }
 
 if [[ $WITH_ENGINE -eq 1 ]]; then
     if dpkg -s fcitx5-ngosen >/dev/null 2>&1 && [[ $FORCE_ENGINE -eq 0 ]]; then
         echo "Đã có gói fcitx5-ngosen — dùng engine hệ thống, bỏ qua bản đi kèm."
         echo "(Dùng --force-engine nếu vẫn muốn ghi đè.)"
+        install_settings_launcher
     else
         install_engine
     fi
-elif ! dpkg -s fcitx5-ngosen >/dev/null 2>&1 && ! [[ -f "/usr/lib/$(uname -m)-linux-gnu/fcitx5/libngosen.so" ]]; then
+elif dpkg -s fcitx5-ngosen >/dev/null 2>&1 || [[ -f "/usr/lib/$(uname -m)-linux-gnu/fcitx5/libngosen.so" ]]; then
+    install_settings_launcher
+else
     echo
     echo "Lưu ý: chưa có engine Vietfox. Muốn cài kèm, chạy lại với --with-engine."
 fi

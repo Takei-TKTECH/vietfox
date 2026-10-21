@@ -219,15 +219,6 @@ class TypingPage(Page):
         self.add(
             advanced,
             self.switch(
-                "useSurroundingTextIfPossible",
-                "Dùng surrounding text khi có thể",
-                False,
-                keywords="surrounding text",
-            ),
-        )
-        self.add(
-            advanced,
-            self.switch(
                 "WaitSurroundingEvent",
                 "Chờ sự kiện surrounding text",
                 "Thử nghiệm, dùng cho chế độ Mặc định.",

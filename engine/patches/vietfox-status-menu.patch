@@ -1,0 +1,84 @@
+diff --git a/src/ngosen-engine.cpp b/src/ngosen-engine.cpp
+index 01526ef..f96a8e4 100644
+--- a/src/ngosen-engine.cpp
++++ b/src/ngosen-engine.cpp
+@@ -277,8 +277,8 @@ namespace fcitx {
+         auto& uiManager = instance_->userInterfaceManager();
+ 
+         charsetAction_ = std::make_unique<SimpleAction>();
+-        charsetAction_->setShortText(_("Charset"));
+-        charsetAction_->setIcon("character-set");
++        charsetAction_->setShortText("Bảng mã");
++        charsetAction_->setIcon("vietfox-charset");
+         uiManager.registerAction("ngosen-charset", charsetAction_.get());
+         charsetMenu_ = std::make_unique<Menu>();
+         charsetAction_->setMenu(charsetMenu_.get());
+@@ -305,24 +305,24 @@ namespace fcitx {
+         }
+         config_.outputCharset.annotation().setList(charsets);
+ 
+-        initToggleAction(spellCheckAction_, config_.spellCheck, "ngosen-spellcheck", "tools-check-spelling", _("Spell Check"), _("Spell Check"), uiManager);
+-        initToggleAction(macroAction_, config_.enableMacro, "ngosen-macro", "document-edit", _("Macro"), _("Macro"), uiManager);
+-        initToggleAction(capitalizeMacroAction_, config_.capitalizeMacro, "ngosen-capitalizemacro", "format-text-uppercase", _("Capitalize Macro"), _("Capitalize Macro"),
++        initToggleAction(spellCheckAction_, config_.spellCheck, "ngosen-spellcheck", "vietfox-spell-check", "Kiểm tra chính tả", "Kiểm tra chính tả", uiManager);
++        initToggleAction(macroAction_, config_.enableMacro, "ngosen-macro", "vietfox-macro", "Gõ tắt", "Gõ tắt", uiManager);
++        initToggleAction(capitalizeMacroAction_, config_.capitalizeMacro, "ngosen-capitalizemacro", "vietfox-capitalize", "Viết hoa gõ tắt", "Viết hoa gõ tắt",
+                          uiManager);
+-        initToggleAction(autoNonVnRestoreAction_, config_.autoNonVnRestore, "ngosen-autonvnrestore", "edit-undo", _("Auto Restore Invalid Words"), _("Auto Non-VN Restore"),
++        initToggleAction(autoNonVnRestoreAction_, config_.autoNonVnRestore, "ngosen-autonvnrestore", "vietfox-restore", "Tự khôi phục từ không phải tiếng Việt", "Tự khôi phục từ",
+                          uiManager);
+-        initToggleAction(enableDictionaryAction_, config_.enableDictionary, "ngosen-dictionary", "accessories-dictionary", _("Custom Dictionary"), _("Custom Dictionary"),
++        initToggleAction(enableDictionaryAction_, config_.enableDictionary, "ngosen-dictionary", "vietfox-dictionary", "Từ điển cá nhân", "Từ điển cá nhân",
+                          uiManager);
+ 
+         settingsAction_ = std::make_unique<SimpleAction>();
+-        settingsAction_->setShortText(_("Settings"));
+-        settingsAction_->setIcon("configure");
++        settingsAction_->setShortText("Cài đặt Vietfox");
++        settingsAction_->setIcon("io.github.vietfox.Settings");
+         connections_.emplace_back(settingsAction_->connect<SimpleAction::Activated>([](InputContext*) { startProcess({NGOSEN_SETTINGS_PATH}); }));
+         uiManager.registerAction("ngosen-settings", settingsAction_.get());
+ 
+         saveLogAction_ = std::make_unique<SimpleAction>();
+-        saveLogAction_->setShortText(_("Save typing log"));
+-        saveLogAction_->setIcon("document-save");
++        saveLogAction_->setShortText("Lưu nhật ký gõ");
++        saveLogAction_->setIcon("vietfox-save-log");
+         connections_.emplace_back(saveLogAction_->connect<SimpleAction::Activated>([this](InputContext* ic) { saveTypingLog(ic); }));
+         uiManager.registerAction("ngosen-save-log", saveLogAction_.get());
+ 
+@@ -340,7 +340,7 @@ namespace fcitx {
+         instance_->inputContextManager().registerProperty("NgoSenState", &factory_);
+         appRulesPath_ = configDir + "/ngosen-app-rules.conf";
+         loadAppRules();
+-        toggleActions_ = {charsetAction_.get(),          spellCheckAction_.get(),       macroAction_.get(),   capitalizeMacroAction_.get(),
++        toggleActions_ = {charsetAction_.get(), spellCheckAction_.get(), macroAction_.get(), capitalizeMacroAction_.get(),
+                           autoNonVnRestoreAction_.get(), enableDictionaryAction_.get(), saveLogAction_.get(), settingsAction_.get()};
+     }
+ 
+@@ -494,11 +494,11 @@ namespace fcitx {
+         refreshEngine();
+         refreshOption();
+         updateCharsetAction(nullptr);
+-        updateAction(nullptr, spellCheckAction_, config_.spellCheck, _("Spell Check"));
+-        updateAction(nullptr, macroAction_, config_.enableMacro, _("Macro"));
+-        updateAction(nullptr, capitalizeMacroAction_, config_.capitalizeMacro, _("Capitalize Macro"));
+-        updateAction(nullptr, autoNonVnRestoreAction_, config_.autoNonVnRestore, _("Auto Non-VN Restore"));
+-        updateAction(nullptr, enableDictionaryAction_, config_.enableDictionary, _("Custom Dictionary"));
++        updateAction(nullptr, spellCheckAction_, config_.spellCheck, "Kiểm tra chính tả");
++        updateAction(nullptr, macroAction_, config_.enableMacro, "Gõ tắt");
++        updateAction(nullptr, capitalizeMacroAction_, config_.capitalizeMacro, "Viết hoa gõ tắt");
++        updateAction(nullptr, autoNonVnRestoreAction_, config_.autoNonVnRestore, "Tự khôi phục từ");
++        updateAction(nullptr, enableDictionaryAction_, config_.enableDictionary, "Từ điển cá nhân");
+     }
+ 
+     void NgoSenEngine::setSubConfig(const std::string& path, const RawConfig& config) {
+@@ -567,7 +567,7 @@ namespace fcitx {
+                 ic->updatePreedit();
+         }
+         for (const auto& action : toggleActions_) {
+-            statusArea.addAction(StatusGroup::InputMethod, action);
++            statusArea.addAction(StatusGroup::BeforeInputMethod, action);
+         }
+         state->offerRetype();
+     }

@@ -164,7 +164,11 @@ class FormDialog(Adw.Dialog):
                 choices = field["choices"]
                 self._choices[field["name"]] = choices
                 row.set_model(Gtk.StringList.new([label for _, label in choices]))
-                row.set_selected(0)
+                value = field.get("value")
+                selected = next(
+                    (i for i, (option, _label) in enumerate(choices) if option == value), 0
+                )
+                row.set_selected(selected)
                 group.add(row)
                 self._inputs.append((field, row))
             else:

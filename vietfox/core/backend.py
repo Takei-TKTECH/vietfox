@@ -106,6 +106,10 @@ class Backend:
                 self.set_rules(
                     [_clean_pair(item, "App", "Mode") for item in self._local["rules"] if isinstance(item, dict)]
                 )
+            if isinstance(self._local.get("keymaps"), list):
+                self.set_keymap(
+                    [_clean_pair(item, "Key", "Value") for item in self._local["keymaps"] if isinstance(item, dict)]
+                )
         except BackendError:
             return
         self._local = {}
@@ -224,6 +228,25 @@ class Backend:
             return
         self._set_sub("app_rules", "Rules", rules, ("App", "Mode"))
 
+    def get_keymap(self) -> list[dict[str, str]]:
+        if not self.online:
+            rows = self._local.get("keymaps", [])
+            return [_clean_pair(item, "Key", "Value") for item in rows if isinstance(item, dict)]
+        try:
+            data = self._get_config(self.addon, "custom_keymap")
+        except GLib.Error:
+            return []
+        return _dict_list(data.get("CustomKeymap"), "Key", "Value")
+
+    def set_keymap(self, rows: list[dict[str, str]]) -> None:
+        clean = [_clean_pair(item, "Key", "Value") for item in rows]
+        if not self.online:
+            self._local["keymaps"] = clean
+            self._local["pending"] = True
+            self._write_local_file()
+            return
+        self._set_sub("custom_keymap", "CustomKeymap", clean, ("Key", "Value"))
+
     def _set_sub(
         self,
         sub: str,
@@ -293,12 +316,16 @@ class Backend:
 
     # ----------------------------------------------------------------- backup
     def snapshot(self) -> dict:
+        words = self.get_dictionary()
+        config = dict(self.values)
         return {
             "meta": {"version": 1, "app": "Vietfox"},
-            "settings": dict(self.values),
+            "settings": config,
+            "config": config,
             "macros": self.get_macros(),
             "rules": self.get_rules(),
-            "dictionary": self.get_dictionary(),
+            "keymaps": self.get_keymap(),
+            "dictionary": "\n".join(words) + ("\n" if words else ""),
         }
 
     def restore(self, data: dict) -> None:
@@ -314,6 +341,11 @@ class Backend:
         if isinstance(data.get("rules"), list):
             self.set_rules(
                 [_clean_pair(item, "App", "Mode") for item in data["rules"] if isinstance(item, dict)]
+            )
+        keymaps = data.get("keymaps", data.get("custom_keymap"))
+        if isinstance(keymaps, list):
+            self.set_keymap(
+                [_clean_pair(item, "Key", "Value") for item in keymaps if isinstance(item, dict)]
             )
         words = data.get("dictionary")
         if isinstance(words, str):

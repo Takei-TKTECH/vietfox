@@ -17,16 +17,18 @@ from gi.repository import Adw, Gdk, Gio, GLib, Gtk
 
 from ..core.backend import Backend, BackendError
 from ..core.store import Store
-from ..version import APP_ID, APP_NAME, VERSION
+from ..version import APP_NAME
 from .helpers import normalize
 from .pages.about import AboutPage
 from .pages.apps import AppsPage
 from .pages.base import Page
+from .pages.keymap import KeymapPage
 from .pages.macros import MacrosPage
+from .pages.quick import QuickPage
 from .pages.shortcuts import ShortcutsPage
 from .pages.typing import TypingPage
 
-PAGE_CLASSES = (TypingPage, MacrosPage, ShortcutsPage, AppsPage, AboutPage)
+PAGE_CLASSES = (QuickPage, TypingPage, MacrosPage, KeymapPage, ShortcutsPage, AppsPage, AboutPage)
 
 
 class VietfoxWindow(Adw.ApplicationWindow):
@@ -222,7 +224,9 @@ class VietfoxWindow(Adw.ApplicationWindow):
             "backup": self._backup,
             "restore": self._restore,
             "reset": self._reset,
-            "about": lambda: self.show_about(),
+            "about": lambda: self._select_page(
+                next(index for index, page in enumerate(self.pages) if page.ident == "about")
+            ),
             "quit": lambda: self.close(),
         }
         for name, callback in actions.items():
@@ -236,6 +240,17 @@ class VietfoxWindow(Adw.ApplicationWindow):
             page = cls(self)
             self.pages.append(page)
             self.stack.add_named(page.widget, page.ident)
+
+    def sync_switch_setting(self, key: str, value: bool, source_page) -> None:
+        """Keep duplicate quick-access switches in sync across pages."""
+        for page in self.pages:
+            if page is source_page:
+                continue
+            row = page.rows.get(key)
+            if isinstance(row, Adw.SwitchRow):
+                row._vf_guard = True
+                row.set_active(bool(value))
+                row._vf_guard = False
 
     def _build_navigation(self) -> None:
         self._selecting = True
@@ -467,30 +482,6 @@ class VietfoxWindow(Adw.ApplicationWindow):
             "Đã kết nối fcitx5." if backend.online else "Vẫn chưa kết nối được fcitx5."
         )
 
-    # ------------------------------------------------------------------ dialog
-    def show_about(self) -> None:
-        about = Adw.AboutDialog(
-            application_name=APP_NAME,
-            application_icon=APP_ID,
-            version=VERSION,
-            developer_name="Vietfox",
-            comments="Bộ gõ tiếng Việt cho Linux, giao diện theo chuẩn GNOME.",
-            website="https://github.com/ngosen/ngosen",
-            issue_url="https://github.com/ngosen/ngosen/issues",
-            copyright="© 2026 Vietfox contributors",
-            license_type=Gtk.License.GPL_3_0,
-            developers=["Vietfox contributors"],
-        )
-        about.add_credit_section(
-            "Dựa trên",
-            [
-                "Ngó Sen — Nguyễn Hoàng Kỳ https://github.com/ngosen/ngosen",
-                "Bamboo — https://github.com/BambooEngine/ibus-bamboo",
-                "fcitx5 — https://fcitx-im.org",
-            ],
-        )
-        about.present(self)
-
     # ------------------------------------------------------------------ backup
     def _backup(self) -> None:
         dialog = Gtk.FileDialog()
@@ -536,7 +527,8 @@ class VietfoxWindow(Adw.ApplicationWindow):
                 self.show_error(f"Tệp không hợp lệ: {error}")
                 return
             if not isinstance(data, dict) or not any(
-                key in data for key in ("settings", "config", "macros", "rules", "dictionary")
+                key in data
+                for key in ("settings", "config", "macros", "rules", "keymaps", "custom_keymap", "dictionary")
             ):
                 self.show_error("Tệp không phải bản sao lưu của Vietfox.")
                 return

@@ -8,6 +8,8 @@ import sys
 import tempfile
 import unittest
 
+from gi.repository import GLib
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from vietfox.core import backend as backend_module
@@ -112,9 +114,70 @@ class OfflineBackendTest(unittest.TestCase):
         backend = Backend()
         backend.set_macros([{"Key": "vf", "Value": "Vietfox"}])
         backend.set_rules([{"App": "zalo", "Mode": "5"}])
+        backend.set_keymap([{"Key": "w", "Value": "UOA_ƯƠĂ"}])
         again = Backend()
         self.assertEqual(again.get_macros(), [{"Key": "vf", "Value": "Vietfox"}])
         self.assertEqual(again.get_rules(), [{"App": "zalo", "Mode": "5"}])
+        self.assertEqual(again.get_keymap(), [{"Key": "w", "Value": "UOA_ƯƠĂ"}])
+
+    def test_backup_contains_ngosen_compatible_config_and_keymaps(self):
+        backend = Backend()
+        backend.values = {"Mode": "Sen", "EnableCustomKeymap": "True"}
+        backend.set_keymap([{"Key": "w", "Value": "UOA_ƯƠĂ"}])
+        snapshot = backend.snapshot()
+        self.assertEqual(snapshot["config"], snapshot["settings"])
+        self.assertEqual(snapshot["keymaps"], [{"Key": "w", "Value": "UOA_ƯƠĂ"}])
+
+        restored = Backend()
+        restored.restore(snapshot)
+        self.assertEqual(restored.values, snapshot["config"])
+        self.assertEqual(restored.get_keymap(), snapshot["keymaps"])
+
+
+class OnlineKeymapBackendTest(unittest.TestCase):
+    class RecordingProxy:
+        def __init__(self):
+            self.calls = []
+
+        def call_sync(self, method, parameters, *_args):
+            self.calls.append((method, parameters))
+            return None
+
+    def test_keymap_uses_ngosen_subconfig_path_and_shape(self):
+        backend = Backend()
+        backend.online = True
+        backend.addon = "ngosen"
+        backend._proxy = self.RecordingProxy()
+        backend.set_keymap([{"Key": "w", "Value": "UOA_ƯƠĂ"}])
+
+        method, parameters = backend._proxy.calls[0]
+        self.assertEqual(method, "SetConfig")
+        self.assertEqual(
+            parameters.get_child_value(0).get_string(),
+            "fcitx://config/addon/ngosen/custom_keymap",
+        )
+        values = parameters.get_child_value(1).get_variant().unpack()
+        self.assertEqual(
+            values,
+            {"CustomKeymap": {"0": {"Key": "w", "Value": "UOA_ƯƠĂ"}}},
+        )
+
+    def test_get_config_unwraps_fcitx_controller_reply(self):
+        backend = Backend()
+        config = GLib.Variant("a{sv}", {"Mode": GLib.Variant("s", "Sen")})
+        reply = GLib.Variant(
+            "(va(sa(sssva{sv})))",
+            (GLib.Variant("v", config), []),
+        )
+
+        class ReplyProxy:
+            def call_sync(self, method, _parameters, *_args):
+                self.method = method
+                return reply
+
+        backend._proxy = ReplyProxy()
+        self.assertEqual(backend._get_config("ngosen"), {"Mode": "Sen"})
+        self.assertEqual(backend._proxy.method, "GetConfig")
 
 
 if __name__ == "__main__":

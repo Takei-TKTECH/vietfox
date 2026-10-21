@@ -68,6 +68,16 @@ Lệnh này cài **giao diện + engine Ngó Sen đi kèm** vào máy, thêm “
 nhóm gõ của fcitx5 rồi khởi động lại fcitx5. Sau đó **không cần** cài gói
 `fcitx5-ngosen` nữa.
 
+Installer cũng nối mục **Settings** trong menu Vietfox trên top bar tới giao diện Vietfox bằng
+launcher `/usr/bin/fcitx5-ngosen-settings`. Nếu đã có launcher cùng tên của Ngó Sen, installer
+giữ nguyên launcher đó để không ghi đè ứng dụng khác.
+
+Trên Ubuntu với GNOME 50, Vietfox cài extension `forward-keys@ngosen.github.io` để sửa lỗi GNOME làm rơi phím được bộ gõ chuyển tiếp, khiến Chrome không nhận chữ tiếng Việt. Sau khi cài, hãy đăng xuất rồi đăng nhập lại để GNOME nạp extension; sau đó chạy một lần:
+
+```sh
+gnome-extensions enable forward-keys@ngosen.github.io
+```
+
 - Engine nằm trong `engine/` của repo (xem `engine/README.md`), giấy phép
   GPL-3.0-or-later, nguồn https://github.com/ngosen/ngosen.
 - Cần `fcitx5` chạy trên máy; engine được cài vào `/usr` nên sẽ hỏi mật khẩu sudo.
@@ -77,7 +87,7 @@ nhóm gõ của fcitx5 rồi khởi động lại fcitx5. Sau đó **không cầ
 ### Cách 2 — chỉ cài giao diện
 
 ```
-./install.sh              # cài cho người dùng hiện tại vào ~/.local
+./install.sh              # cài cho người dùng hiện tại vào ~/.local; nối menu Settings nếu có engine
 sudo ./install.sh --system  # cài vào /usr/local
 ./install.sh --uninstall    # gỡ bản cài cho người dùng
 ```

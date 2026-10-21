@@ -71,6 +71,7 @@ class Page:
             apply(self.store.get(key))
             self.window.show_error(str(error))
             return
+        self.window.sync_switch_setting(key, bool(value), self)
         self.window.show_saved(title, lambda: self._revert(key, title, old, apply))
 
     def _revert(self, key: str, title: str, old, apply) -> None:
@@ -80,6 +81,7 @@ class Page:
             self.window.show_error(str(error))
             return
         apply(old)
+        self.window.sync_switch_setting(key, bool(old), self)
         self.window.show_undone(title)
 
     def _cancel_pending(self, key: str) -> None:

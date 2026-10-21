@@ -1,0 +1,13 @@
+diff --git a/bamboo/fcitxbambooengine.go b/bamboo/fcitxbambooengine.go
+index 6dcd6fb..517ccd5 100644
+--- a/bamboo/fcitxbambooengine.go
++++ b/bamboo/fcitxbambooengine.go
+@@ -322,7 +322,7 @@ func (e *FcitxBambooEngine) getCommitText(keyVal, state uint32, oldText string)
+ 				return e.expandMacro(oldText, macroVal) + string(keyRune), true
+ 			}
+ 		}
+-		if bamboo.HasAnyVietnameseRune(oldText) && e.mustFallbackToEnglish() {
++		if !bamboo.IsPunctuationMark(keyRune) && bamboo.HasAnyVietnameseRune(oldText) && e.mustFallbackToEnglish() {
+ 			e.preeditor.RestoreLastWord(false)
+ 			newText := e.getProcessedString(bamboo.EnglishMode|bamboo.FullText) + string(keyRune)
+ 			e.preeditor.ProcessKey(keyRune, bamboo.EnglishMode)
