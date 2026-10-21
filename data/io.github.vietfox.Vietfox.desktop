@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Vietfox
+Comment=Bộ gõ tiếng Việt cho Linux
+GenericName=Cài đặt bộ gõ tiếng Việt
+Exec=vietfox
+Icon=io.github.vietfox.Vietfox
+Terminal=false
+Type=Application
+Categories=Settings;DesktopSettings;
+Keywords=vietnamese;tieng viet;input;fcitx;ngosen;go tieng viet;
+StartupNotify=true

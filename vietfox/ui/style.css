@@ -1,0 +1,22 @@
+/* Vietfox only styles what Adwaita has no widget for. */
+
+.vf-mono {
+  font-family: "Xanh Mono", "JetBrains Mono", "DejaVu Sans Mono", monospace;
+  font-size: 0.95em;
+}
+
+.vf-highlight {
+  background-color: alpha(@accent_bg_color, 0.14);
+  border-radius: 12px;
+}
+
+.vf-keycap {
+  background-color: alpha(@window_fg_color, 0.09);
+  border: 1px solid alpha(@window_fg_color, 0.14);
+  border-radius: 7px;
+  padding: 1px 10px;
+  min-height: 26px;
+  font-family: "JetBrains Mono", "DejaVu Sans Mono", monospace;
+  font-weight: 600;
+  box-shadow: none;
+}
