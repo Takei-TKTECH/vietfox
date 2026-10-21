@@ -35,6 +35,16 @@ cấu hình cũ để dùng tiếp kiểu gõ, từ điển, gõ tắt và quy t
 - Sáng/tối, cỡ chữ và màu nhấn theo hệ thống (libadwaita).
 - Kết nối fcitx5 qua D-Bus (`org.fcitx.Fcitx.Controller1`); không có fcitx5 thì lưu tạm và báo rõ.
 
+## Cách sử dụng
+
+1. Bấm vào ô cần nhập chữ.
+2. Nhấn **Ctrl + Space** để chuyển giữa tiếng Anh và tiếng Việt. Nhấn lại tổ hợp này để quay về
+   tiếng Anh.
+3. Khi Vietfox đang bật, gõ Telex theo cấu hình mặc định, ví dụ `tieengs Vieetj` thành `tiếng Việt`.
+
+Biểu tượng **V** trên top bar cho biết Vietfox đang bật; **N** cho biết đang ở chế độ tiếng Anh.
+Có thể đổi kiểu gõ và phím tắt trong **Cài đặt Vietfox**.
+
 ## Chạy thử
 
 Cần Python 3.10+, PyGObject, GTK 4.14+ và libadwaita 1.6+ (Ubuntu 24.10 trở lên, Fedora 41+):
